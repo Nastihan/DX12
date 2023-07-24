@@ -143,6 +143,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="GraphicsError.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -150,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="Graphics.h" />
     <ClInclude Include="GraphicsError.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

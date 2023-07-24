@@ -41,13 +41,10 @@ void operator>>(HrGrabber g, CheckerToken)
 		throw std::runtime_error{
 			
 			std::format(
-				" {}:{}:{} \nHRESULT failed with error code {}",
+				" {}:{}:{} \nHRESULT failed with error code : {}",
 				g.loc.file_name(),
-				
 				g.loc.line(),
-				
 				g.loc.column(),
-				
 				TranslateErrorCode(g.hr)
 			)
 		};
