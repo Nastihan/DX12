@@ -3,7 +3,8 @@
 #include <GLFW/glfw3native.h>
 
 Window::Window(uint16_t width, uint16_t height, std::string title)
-    : width(width), height(height)
+    : width(width), height(height),
+    gfx(std::make_unique<Graphics>(width,height))
 {
     glfwInit();
 
