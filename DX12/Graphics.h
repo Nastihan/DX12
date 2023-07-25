@@ -6,7 +6,7 @@
 class Graphics
 {
 public:
-	Graphics(uint16_t width, uint16_t height);
+	Graphics(uint16_t width, uint16_t height,HWND hWnd);
 private:
 	// DX objects
 	Microsoft::WRL::ComPtr<ID3D12Device2> pDevice;

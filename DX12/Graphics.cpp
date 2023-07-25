@@ -4,7 +4,7 @@
 #include <dxgi1_6.h>
 #include "d3dx12.h"
 
-Graphics::Graphics(uint16_t width, uint16_t height)
+Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	:
 	width(width),height(height)
 {
@@ -50,7 +50,7 @@ Graphics::Graphics(uint16_t width, uint16_t height)
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> pSwapChain1;
 		pdxgiFactory->CreateSwapChainForHwnd(
 			pCommandQueue.Get(),
-			nullptr,
+			hWnd,
 			&swapChainDesc,
 			nullptr,
 			nullptr,
