@@ -17,5 +17,14 @@ Graphics::Graphics(uint16_t width, uint16_t height)
 	pdxgifactory->EnumAdapters(1U, pAdapter.GetAddressOf());
 
 	// device
-	D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&pDevice));
+	D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&pDevice)) >> chk;
+
+	// command queue
+	D3D12_COMMAND_QUEUE_DESC cqDesc = {
+		.Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
+		.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
+		.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
+		.NodeMask = 0,
+	};
+	pDevice->CreateCommandQueue(&cqDesc, IID_PPV_ARGS(&pCommandQueue)) >> chk;
 }
