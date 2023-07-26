@@ -9,9 +9,11 @@ void App::Run()
 {
 	while (!glfwWindowShouldClose(&wnd.Wnd()))
 	{
+		wnd.Gfx().BeginFrame();
 		
 
 
+		wnd.Gfx().EndFrame();
 		glfwPollEvents();
 	}
 }
