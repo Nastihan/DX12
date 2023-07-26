@@ -3,6 +3,11 @@
 #include <d3d12.h>
 #include "d3dx12.h"
 #include <stdexcept>
+#include <cmath>
+#include <numbers>
+
+static float t = 0.f;
+constexpr float step = 0.01f;
 
 Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	:
@@ -123,7 +128,13 @@ void Graphics::BeginFrame()
 			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		pCommandList->ResourceBarrier(1, &barrier); 
 
-		FLOAT clearColor[] = { 0.8f,0.2f,0.3f,1.0f };
+		const FLOAT clearColor[] = {
+							sin(2.f * t + 1.f) / 2.f + .5f,
+							sin(3.f * t + 2.f) / 2.f + .5f,
+							sin(5.f * t + 3.f) / 2.f + .5f,
+							1.0f
+		};
+		// clear rtv
 		const CD3DX12_CPU_DESCRIPTOR_HANDLE rtv{
 					rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 					(INT)curBackBufferIndex, rtvDescriptorSize };
@@ -154,6 +165,10 @@ void Graphics::EndFrame()
 	pFence->SetEventOnCompletion(fenceValue - 1, fenceEvent) >> chk;
 	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
 		GetLastError() >> chk;
+	}
+
+	if ((t += step) >= 2.f * std::numbers::pi_v<float>) {
+		t = 0.f;
 	}
 }
 
