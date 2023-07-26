@@ -10,7 +10,7 @@ public:
 	Graphics(uint16_t width, uint16_t height,HWND hWnd);
 	void BeginFrame();
 	void EndFrame();
-	void CleanUp();
+	void QueueEmpty();
 private:
 	// DX objects
 	Microsoft::WRL::ComPtr<ID3D12Device2> pDevice;

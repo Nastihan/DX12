@@ -157,7 +157,7 @@ void Graphics::EndFrame()
 	}
 }
 
-void Graphics::CleanUp()
+void Graphics::QueueEmpty()
 {
 	pCommandQueue->Signal(pFence.Get(), fenceValue);
 	pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;

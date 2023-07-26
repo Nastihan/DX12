@@ -17,6 +17,6 @@ void App::Run()
 		glfwPollEvents();
 
 		if (glfwWindowShouldClose(&wnd.Wnd()))
-			wnd.Gfx().CleanUp();
+			wnd.Gfx().QueueEmpty();
 	}
 }

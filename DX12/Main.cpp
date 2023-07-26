@@ -9,7 +9,6 @@ int main()
 	}
 	catch (const std::exception& e) {	
 		MessageBoxA(nullptr, e.what(), "Error",MB_ICONERROR | MB_SETFOREGROUND);
-	
 	}
 	return 0;
 }  
