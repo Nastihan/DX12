@@ -2,6 +2,7 @@
 #include "GraphicsError.h"
 #include <d3d12.h>
 #include "d3dx12.h"
+#include <stdexcept>
 
 Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	:
@@ -84,8 +85,20 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 
 	// command list
 	pDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
-		pCommandAllocator.Get(), NULL, IID_PPV_ARGS(&pCommandList)) >> chk;
+		pCommandAllocator.Get(), nullptr, IID_PPV_ARGS(&pCommandList)) >> chk;
 	pCommandList->Close();
+
+	// fence 
+	pDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&pFence)) >> chk;
+
+	// fence signalling event 
+	fenceEvent = CreateEventW(nullptr, FALSE, FALSE, nullptr);
+	if (!fenceEvent)
+	{
+		GetLastError() >> chk;
+		throw std::runtime_error("failed to create fence event");
+	}
+
 
 
 }
