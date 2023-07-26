@@ -8,6 +8,6 @@ public:
 	App();
 	void Run();
 private:
-	Window window;
+	Window wnd;
 
 };

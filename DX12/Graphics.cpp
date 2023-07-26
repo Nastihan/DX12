@@ -98,7 +98,12 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		GetLastError() >> chk;
 		throw std::runtime_error("failed to create fence event");
 	}
+}
 
+void Graphics::BeginFrame()
+{
+}
 
-
+void Graphics::EndFrame()
+{
 }
