@@ -25,6 +25,9 @@ private:
 	uint64_t fenceValue = 0;
 	HANDLE fenceEvent;
 
+	// current back buffer index
+	UINT curBackBufferIndex;
+
 
 	uint16_t width;
 	uint16_t height;

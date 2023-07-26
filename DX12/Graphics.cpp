@@ -101,7 +101,6 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 
 void Graphics::BeginFrame()
 {
-	UINT curBackBufferIndex;
 	// advance backbuffer
 	curBackBufferIndex = pSwapChain->GetCurrentBackBufferIndex();
 	// 
@@ -130,4 +129,24 @@ void Graphics::BeginFrame()
 
 void Graphics::EndFrame()
 {
+	// prepare buffer for presentation by transitioning to present state
+	auto& backBuffer = pBackBuffers[curBackBufferIndex];
+	const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	pCommandList->ResourceBarrier(1, &barrier);
+
+	// submit command list
+	pCommandList->Close() >> chk;
+	ID3D12CommandList* const commandLists[] = { pCommandList.Get() };
+	pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
+
+	pCommandQueue->Signal(pFence.Get(), fenceValue++) >> chk;
+
+	// present
+	pSwapChain->Present(0, 0);
+
+	pFence->SetEventOnCompletion(fenceValue - 1, fenceEvent) >> chk;
+	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
+		GetLastError() >> chk;
+	}
 }
