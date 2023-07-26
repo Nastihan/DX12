@@ -69,13 +69,12 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	const auto rtvDescriptorSize = pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	// rtv descriptors and buffer refrences
-	Microsoft::WRL::ComPtr<ID3D12Resource> backBuffers[bufferCount];
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 		for (int i = 0; i < bufferCount; i++)
 		{
-			pSwapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffers[i])) >> chk;
-			pDevice->CreateRenderTargetView(backBuffers[i].Get(), nullptr, rtvHandle);
+			pSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffers[i])) >> chk;
+			pDevice->CreateRenderTargetView(pBackBuffers[i].Get(), nullptr, rtvHandle);
 			rtvHandle.Offset(rtvDescriptorSize);
 		}
 	}
@@ -102,6 +101,31 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 
 void Graphics::BeginFrame()
 {
+	UINT curBackBufferIndex;
+	// advance backbuffer
+	curBackBufferIndex = pSwapChain->GetCurrentBackBufferIndex();
+	// 
+	const auto rtvDescriptorSize = pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	auto& backBuffer = pBackBuffers[curBackBufferIndex];
+	// reset command list and command allocator
+	pCommandAllocator->Reset() >> chk;
+	pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
+
+	// clear the render target
+	{
+		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
+			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		pCommandList->ResourceBarrier(1, &barrier); 
+
+		FLOAT clearColor[] = { 0.2f,0.4f,0.1f,1.0f };
+		const CD3DX12_CPU_DESCRIPTOR_HANDLE rtv{
+					rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+					(INT)curBackBufferIndex, rtvDescriptorSize };
+
+		pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+	}
+
 }
 
 void Graphics::EndFrame()

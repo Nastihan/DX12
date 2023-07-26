@@ -16,6 +16,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> pCommandQueue;
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> pSwapChain;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
+	// !!!!!! note !!!!!! manually writing the buffer count
+	Microsoft::WRL::ComPtr<ID3D12Resource> pBackBuffers[2];
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> pCommandAllocator;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> pCommandList;
 	// fence
