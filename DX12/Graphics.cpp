@@ -1,7 +1,6 @@
 #include "Graphics.h"
 #include "GraphicsError.h"
 #include <d3d12.h>
-#include <dxgi1_6.h>
 #include "d3dx12.h"
 
 Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
@@ -28,8 +27,8 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	};
 	pDevice->CreateCommandQueue(&cqDesc, IID_PPV_ARGS(&pCommandQueue)) >> chk;
 
+
 	// swap chain
-	Microsoft::WRL::ComPtr<IDXGISwapChain4> pSwapChain;
 	{
 		const DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {
 			.Width = width,
@@ -38,7 +37,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 			.Stereo = FALSE,
 			.SampleDesc = {
 				.Count = 1,
-				.Quality = 0
+				.Quality = 0 
 			},
 			.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
 			.BufferCount = bufferCount,
@@ -59,7 +58,6 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	}
 
 	// rtv descriptor heap
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
 	{
 		const D3D12_DESCRIPTOR_HEAP_DESC desc = {
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
@@ -80,5 +78,14 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 			rtvHandle.Offset(rtvDescriptorSize);
 		}
 	}
+
+	// command allocater
+	pDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&pCommandAllocator)) >> chk;
+
+	// command list
+	pDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
+		pCommandAllocator.Get(), NULL, IID_PPV_ARGS(&pCommandList)) >> chk;
+	pCommandList->Close();
+
 
 }
