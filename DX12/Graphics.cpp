@@ -149,10 +149,19 @@ void Graphics::EndFrame()
 	pCommandQueue->Signal(pFence.Get(), fenceValue++) >> chk;
 
 	// present
-	pSwapChain->Present(0, 0);
+	pSwapChain->Present(1, 0);
 
 	pFence->SetEventOnCompletion(fenceValue - 1, fenceEvent) >> chk;
 	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
+		GetLastError() >> chk;
+	}
+}
+
+void Graphics::CleanUp()
+{
+	pCommandQueue->Signal(pFence.Get(), fenceValue);
+	pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
+	if (WaitForSingleObject(fenceEvent, 2000) == WAIT_FAILED) {
 		GetLastError() >> chk;
 	}
 }

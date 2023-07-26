@@ -10,6 +10,7 @@ public:
 	Graphics(uint16_t width, uint16_t height,HWND hWnd);
 	void BeginFrame();
 	void EndFrame();
+	void CleanUp();
 private:
 	// DX objects
 	Microsoft::WRL::ComPtr<ID3D12Device2> pDevice;
@@ -18,6 +19,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
 	// !!!!!! note !!!!!! manually writing the buffer count
 	Microsoft::WRL::ComPtr<ID3D12Resource> pBackBuffers[2];
+
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> pCommandAllocator;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> pCommandList;
 	// fence

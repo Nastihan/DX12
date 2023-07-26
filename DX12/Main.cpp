@@ -11,5 +11,5 @@ int main()
 		MessageBoxA(nullptr, e.what(), "Error",MB_ICONERROR | MB_SETFOREGROUND);
 	
 	}
-	return -1;
+	return 0;
 }  
