@@ -10,6 +10,12 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 {
 	constexpr UINT bufferCount = 2;
 
+	// enable debug layer for d3d12
+	Microsoft::WRL::ComPtr<ID3D12Debug> pDebugController;
+	D3D12GetDebugInterface(IID_PPV_ARGS(&pDebugController)) >> chk;
+	pDebugController->EnableDebugLayer();
+
+
 	// dxgi factory
 	Microsoft::WRL::ComPtr<IDXGIFactory4> pdxgiFactory;
 	CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&pdxgiFactory)) >> chk;
@@ -17,7 +23,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	pdxgiFactory->EnumAdapters(1U, pAdapter.GetAddressOf());
 
 	// device
-	D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&pDevice)) >> chk;
+	D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&pDevice)) >> chk;
 
 	// command queue
 	D3D12_COMMAND_QUEUE_DESC cqDesc = {
@@ -117,7 +123,7 @@ void Graphics::BeginFrame()
 			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		pCommandList->ResourceBarrier(1, &barrier); 
 
-		FLOAT clearColor[] = { 0.2f,0.4f,0.1f,1.0f };
+		FLOAT clearColor[] = { 0.8f,0.2f,0.3f,1.0f };
 		const CD3DX12_CPU_DESCRIPTOR_HANDLE rtv{
 					rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 					(INT)curBackBufferIndex, rtvDescriptorSize };
