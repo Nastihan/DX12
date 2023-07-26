@@ -58,4 +58,27 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		pSwapChain1.As(&pSwapChain) >> chk;
 	}
 
+	// rtv descriptor heap
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
+	{
+		const D3D12_DESCRIPTOR_HEAP_DESC desc = {
+			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+			.NumDescriptors = bufferCount,
+		};
+		pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&rtvDescriptorHeap)) >> chk;
+	}
+	const auto rtvDescriptorSize = pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+	// rtv descriptors and buffer refrences
+	Microsoft::WRL::ComPtr<ID3D12Resource> backBuffers[bufferCount];
+	{
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		for (int i = 0; i < bufferCount; i++)
+		{
+			pSwapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffers[i])) >> chk;
+			pDevice->CreateRenderTargetView(backBuffers[i].Get(), nullptr, rtvHandle);
+			rtvHandle.Offset(rtvDescriptorSize);
+		}
+	}
+
 }
