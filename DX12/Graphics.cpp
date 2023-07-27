@@ -148,6 +148,21 @@ void Graphics::DrawTriangle()
 			) >> chk;
 		}
 
+		// resource for cpu upload of the vertex data
+		Microsoft::WRL::ComPtr<ID3D12Resource> pUploadVertexBuffer;
+		{
+			const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
+			const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
+
+			pDevice->CreateCommittedResource(&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&desc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&pUploadVertexBuffer)
+			) >> chk;
+		}
+
 	}
 
 
