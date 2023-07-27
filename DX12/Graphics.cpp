@@ -162,6 +162,13 @@ void Graphics::DrawTriangle()
 				IID_PPV_ARGS(&pUploadVertexBuffer)
 			) >> chk;
 		}
+		// copy the vertex data to uploadBuffer
+		{
+			Vertex* mappedVertexData = nullptr;
+			pUploadVertexBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mappedVertexData)) >> chk;
+			std::ranges::copy(vertices, mappedVertexData);
+			pUploadVertexBuffer->Unmap(0, nullptr);
+		}
 
 	}
 
