@@ -8,6 +8,7 @@ class Graphics
 {
 public:
 	Graphics(uint16_t width, uint16_t height,HWND hWnd);
+	void DrawTriangle();
 	void BeginFrame();
 	void EndFrame();
 	void QueueEmpty();

@@ -1,7 +1,10 @@
 #include "Graphics.h"
 #include "GraphicsError.h"
 #include <d3d12.h>
+#include <DirectXMath.h>
 #include "d3dx12.h"
+
+#include <ranges>
 #include <stdexcept>
 #include <cmath>
 #include <numbers>
@@ -56,7 +59,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 			.Scaling = DXGI_SCALING_STRETCH,
 			.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
 			.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,
-			.Flags = 0,
+			.Flags = 4,
 		};
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> pSwapChain1;
 		pdxgiFactory->CreateSwapChainForHwnd(
@@ -108,6 +111,48 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		GetLastError() >> chk;
 		throw std::runtime_error("failed to create fence event");
 	}
+}
+
+void Graphics::DrawTriangle()
+{
+	// Vertex data structure
+	struct Vertex
+	{
+		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT3 color;
+	};
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> pVertexBuffer;
+	UINT nVertices;
+	{
+		// vertex data
+		const Vertex vertices[]{
+				{ {  0.00f,  0.50f, 0.0f }, { 1.0f, 0.0f, 0.0f } }, // top 
+				{ {  0.43f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f } }, // right 
+				{ { -0.43f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f } }, // left 
+		};
+
+		nVertices = (UINT)std::size(vertices);
+
+		// commited resource for the vertex buffer on the gpu side
+		{
+			const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+			const auto desc =CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
+
+			pDevice->CreateCommittedResource(&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&desc,
+				D3D12_RESOURCE_STATE_COPY_DEST,
+				nullptr,
+				IID_PPV_ARGS(&pVertexBuffer)
+			) >> chk;
+		}
+
+	}
+
+
+
+
 }
 
 void Graphics::BeginFrame()
