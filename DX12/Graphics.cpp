@@ -215,10 +215,10 @@ void Graphics::BeginFrame()
 		ID3D12CommandList* const commandLists[] = { pCommandList.Get() };
 		pCommandQueue->ExecuteCommandLists(std::size(commandLists), commandLists);
 	}
-	pCommandQueue->Signal(pFence.Get(), fenceValue++) >> chk;
+	pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
 
 
-	pFence->SetEventOnCompletion(fenceValue - 1, fenceEvent) >> chk;
+	pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
 	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
 		GetLastError() >> chk;
 	}
@@ -246,12 +246,12 @@ void Graphics::EndFrame()
 	ID3D12CommandList* const commandLists[] = { pCommandList.Get() };
 	pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
 
-	pCommandQueue->Signal(pFence.Get(), fenceValue++) >> chk;
+	pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
 
 	// present
 	pSwapChain->Present(1, 0);
 
-	pFence->SetEventOnCompletion(fenceValue - 1, fenceEvent) >> chk;
+	pFence->SetEventOnCompletion(fenceValue , fenceEvent) >> chk;
 	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
 		GetLastError() >> chk;
 	}
@@ -263,7 +263,7 @@ void Graphics::EndFrame()
 
 void Graphics::QueueEmpty()
 {
-	pCommandQueue->Signal(pFence.Get(), fenceValue);
+	pCommandQueue->Signal(pFence.Get(), ++fenceValue);
 	pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
 	if (WaitForSingleObject(fenceEvent, 2000) == WAIT_FAILED) {
 		GetLastError() >> chk;
