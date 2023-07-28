@@ -59,7 +59,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 			.Scaling = DXGI_SCALING_STRETCH,
 			.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
 			.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,
-			.Flags = 4,
+			.Flags = 0,
 		};
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> pSwapChain1;
 		pdxgiFactory->CreateSwapChainForHwnd(
@@ -169,6 +169,8 @@ void Graphics::DrawTriangle()
 			std::ranges::copy(vertices, mappedVertexData);
 			pUploadVertexBuffer->Unmap(0, nullptr);
 		}
+		pCommandAllocator->Reset() >> chk;
+		pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
 
 	}
 
@@ -208,11 +210,31 @@ void Graphics::BeginFrame()
 
 		pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
+	{
+		pCommandList->Close();
+		ID3D12CommandList* const commandLists[] = { pCommandList.Get() };
+		pCommandQueue->ExecuteCommandLists(std::size(commandLists), commandLists);
+	}
+	pCommandQueue->Signal(pFence.Get(), fenceValue++) >> chk;
+
+
+	pFence->SetEventOnCompletion(fenceValue - 1, fenceEvent) >> chk;
+	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
+		GetLastError() >> chk;
+	}
+
+	
 
 }
 
 void Graphics::EndFrame()
 {
+
+	
+
+	pCommandAllocator->Reset() >> chk;
+	pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
+
 	// prepare buffer for presentation by transitioning to present state
 	auto& backBuffer = pBackBuffers[curBackBufferIndex];
 	const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),

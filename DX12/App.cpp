@@ -13,6 +13,10 @@ void App::Run()
 		
 
 
+
+
+
+
 		wnd.Gfx().EndFrame();
 		glfwPollEvents();
 
