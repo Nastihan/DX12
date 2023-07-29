@@ -43,7 +43,7 @@ public:
 		}
 	}
 	// static declartion of pso stream structure
-	struct PipelineStateStream
+	/*struct PipelineStateStream
 	{
 		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE RootSignature;
 		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
@@ -51,7 +51,7 @@ public:
 		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
 		CD3DX12_PIPELINE_STATE_STREAM_PS PS;
 		CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
-	};
+	};*/
 
 private:
 	// DX objects

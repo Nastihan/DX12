@@ -101,7 +101,7 @@ public:
 		Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob;
 		Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
 		if (const auto hr = D3D12SerializeRootSignature(
-			&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_1,
+			&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
 			&signatureBlob, &errorBlob); FAILED(hr)) {
 			if (errorBlob) {
 				auto errorBufferPtr = static_cast<const char*>(errorBlob->GetBufferPointer());
@@ -111,11 +111,19 @@ public:
 			hr >> chk;
 		}
 		// Create root signature
-		gfx.Device()->CreateRootSignature(0, signatureBlob.Get(),
+		gfx.Device()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
 			signatureBlob->GetBufferSize(), IID_PPV_ARGS(&pRootSignature));
 
 		// create pipeline state object
-		Graphics::PipelineStateStream pipelineStateStream;
+		struct PipelineStateStream
+		{
+			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE RootSignature;
+			CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
+			CD3DX12_PIPELINE_STATE_STREAM_VS VS;
+			CD3DX12_PIPELINE_STATE_STREAM_PS PS;
+			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
+		} pipelineStateStream;
 
 		// define the vertex input layout
 		const D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
@@ -125,7 +133,28 @@ public:
 
 		// load the VS & PS
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobVS;
-		D3DReadFileToBlob("VertexShader.cso", &BlobVS) >> chk;
+		D3DReadFileToBlob(L"VertexShader.cso", &BlobVS) >> chk;
+
+		Microsoft::WRL::ComPtr<ID3DBlob> BlobPS;
+		D3DReadFileToBlob(L"PixelShader.cso", &BlobPS) >> chk;
+
+		// filling pso structure
+		pipelineStateStream.RootSignature = pRootSignature.Get();
+		pipelineStateStream.InputLayout = { inputLayout,(UINT)std::size(inputLayout) };
+		pipelineStateStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(BlobVS.Get());
+		pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(BlobPS.Get());
+		pipelineStateStream.RTVFormats = {
+			.RTFormats{ DXGI_FORMAT_R8G8B8A8_UNORM },
+			.NumRenderTargets = 1,
+		};
+
+		// building pipeline state object
+		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc = {
+			sizeof(pipelineStateStream), &pipelineStateStream
+		};
+		gfx.Device()->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&pPipelineState));
+
 
 	}
 	void Draw(Graphics& gfx)
