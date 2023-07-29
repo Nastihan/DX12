@@ -12,6 +12,24 @@ public:
 	void BeginFrame();
 	void EndFrame();
 	void QueueEmpty();
+public:
+	// getter functions for the drawables
+	Microsoft::WRL::ComPtr<ID3D12Device2> Device()
+	{
+		return pDevice;
+	}
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> CommandQueue()
+	{
+		return pCommandQueue;
+	}
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandAllocator()
+	{
+		return pCommandAllocator;
+	}
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> CommandList()
+	{
+		return pCommandList;
+	}
 private:
 	// DX objects
 	Microsoft::WRL::ComPtr<ID3D12Device2> pDevice;
@@ -27,9 +45,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Fence1> pFence;
 	uint64_t fenceValue = 0;
 	HANDLE fenceEvent;
-
 	// current back buffer index
 	UINT curBackBufferIndex = 0;
+
 
 
 	uint16_t width;
