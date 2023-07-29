@@ -1,7 +1,8 @@
 #include "App.h"
 
 App::App()
-	: wnd(1600, 900, "DX12")
+	: wnd(1600, 900, "DX12"),
+	triangle(wnd.Gfx())
 {
 }
 
@@ -13,7 +14,7 @@ void App::Run()
 		
 		// render loop body
 
-		wnd.Gfx().DrawTriangle();
+		//wnd.Gfx().DrawTriangle();
 
 		// render loop body end
 

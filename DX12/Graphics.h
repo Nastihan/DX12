@@ -3,6 +3,7 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include "GraphicsError.h"
 
 class Graphics
 {
@@ -29,6 +30,16 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> CommandList()
 	{
 		return pCommandList;
+	}
+	// synchronization function
+	void Sync()
+	{
+		pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
+		pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
+		if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED)
+		{
+			GetLastError() >> chk;
+		}
 	}
 private:
 	// DX objects

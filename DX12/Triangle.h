@@ -7,6 +7,8 @@
 
 class Triangle
 {
+public:
+
 	Triangle(Graphics& gfx)
 	{
 		// Vertex data structure
@@ -73,22 +75,17 @@ class Triangle
 				pUploadVertexBuffer->Unmap(0, nullptr);
 			}
 
-			pCommandAllocator->Reset() >> chk;
-			pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
+			gfx.CommandAllocator()->Reset() >> chk;
+			gfx.CommandList()->Reset(gfx.CommandAllocator().Get(), nullptr) >> chk;
 
-			pCommandList->CopyResource(pVertexBuffer.Get(), pUploadVertexBuffer.Get());
+			gfx.CommandList()->CopyResource(pVertexBuffer.Get(), pUploadVertexBuffer.Get());
 
-			pCommandList->Close();
+			gfx.CommandList()->Close();
 
-			ID3D12CommandList* commandLists[] = { pCommandList.Get() };
-			pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
+			ID3D12CommandList* commandLists[] = { gfx.CommandList().Get()};
+			gfx.CommandQueue()->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
 
-			pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
-			pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
-			if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED)
-			{
-				GetLastError() >> chk;
-			}
+			gfx.Sync();
 		}
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{
