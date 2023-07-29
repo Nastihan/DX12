@@ -1,7 +1,6 @@
 #include "Graphics.h"
 #include <d3d12.h>
 #include <DirectXMath.h>
-#include "d3dx12.h"
 #include <ranges>
 #include <stdexcept>
 #include <cmath>
@@ -91,7 +90,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	}
 	const auto rtvDescriptorSize = pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-	// rtv descriptors and buffer refrences
+	// rtv descriptors and buffer references
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 		for (int i = 0; i < bufferCount; i++)
@@ -211,10 +210,6 @@ void Graphics::DrawTriangle()
 		.SizeInBytes = nVertices * sizeof(Vertex),
 		.StrideInBytes = sizeof(Vertex),
 	};
-
-
-
-
 }
 
 void Graphics::BeginFrame()
@@ -229,6 +224,11 @@ void Graphics::BeginFrame()
 	pCommandAllocator->Reset() >> chk;
 	pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
 
+	// get rtv handle for the buffer used in this frame
+	const CD3DX12_CPU_DESCRIPTOR_HANDLE rtv{
+				rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+				(INT)curBackBufferIndex, rtvDescriptorSize };
+
 	// clear the render target
 	{
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
@@ -242,12 +242,17 @@ void Graphics::BeginFrame()
 							1.0f
 		};
 		// clear rtv
-		const CD3DX12_CPU_DESCRIPTOR_HANDLE rtv{
-					rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-					(INT)curBackBufferIndex, rtvDescriptorSize };
-
 		pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
+	// universal configs
+	// configure RS
+	pCommandList->RSSetViewports(1, &viewport);
+	pCommandList->RSSetScissorRects(1, &scissorRect);
+	// set primitive topology
+	pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// bind render target
+	pCommandList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+	
 	{
 		pCommandList->Close();
 		ID3D12CommandList* const commandLists[] = { pCommandList.Get() };
@@ -267,9 +272,6 @@ void Graphics::BeginFrame()
 
 void Graphics::EndFrame()
 {
-
-	
-
 	pCommandAllocator->Reset() >> chk;
 	pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
 

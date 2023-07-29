@@ -7,6 +7,8 @@
 #include "GraphicsError.h"
 #include <iostream>
 
+
+
 class Triangle
 {
 public:
@@ -19,7 +21,6 @@ public:
 			DirectX::XMFLOAT3 color;
 		};
 
-		Microsoft::WRL::ComPtr<ID3D12Resource> pVertexBuffer;
 		UINT nVertices;
 		{
 			// vertex data
@@ -89,9 +90,9 @@ public:
 			gfx.Sync();
 		}
 
-		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{
+		vertexBufferView = {
 			.BufferLocation = pVertexBuffer->GetGPUVirtualAddress(),
-			.SizeInBytes = nVertices * sizeof(Vertex),
+			.SizeInBytes = nVertices * (UINT)sizeof(Vertex),
 			.StrideInBytes = sizeof(Vertex),
 		};
 
@@ -114,17 +115,9 @@ public:
 		gfx.Device()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
 			signatureBlob->GetBufferSize(), IID_PPV_ARGS(&pRootSignature));
 
-		// create pipeline state object
-		struct PipelineStateStream
-		{
-			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE RootSignature;
-			CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
-			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
-			CD3DX12_PIPELINE_STATE_STREAM_VS VS;
-			CD3DX12_PIPELINE_STATE_STREAM_PS PS;
-			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
-		} pipelineStateStream;
-
+		// create pso structure
+		Graphics::PipelineStateStream pipelineStateStream;
+		
 		// define the vertex input layout
 		const D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
 			{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0 ,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
@@ -153,15 +146,26 @@ public:
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc = {
 			sizeof(pipelineStateStream), &pipelineStateStream
 		};
-		gfx.Device()->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&pPipelineState));
-
-
+		gfx.Device()->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&pPipelineState)) >> chk;
 	}
 	void Draw(Graphics& gfx)
 	{	
+		gfx.CommandAllocator()->Reset() >> chk;
+		gfx.CommandList()->Reset(gfx.CommandAllocator().Get(),nullptr) >> chk;
+		gfx.CommandList()->SetPipelineState(pPipelineState.Get());
+		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
+		gfx.CommandList()->IASetVertexBuffers(0,1,&vertexBufferView);
+		gfx.CommandList()->DrawInstanced(3, 1, 0, 0);
+
+		gfx.Sync();
 	}
 private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pPipelineState;
+
+	// vertex buffer & vertex buffer view  // should be a member variable for use in IASetVertexBuffers 
+	Microsoft::WRL::ComPtr<ID3D12Resource> pVertexBuffer;
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+
 
 };

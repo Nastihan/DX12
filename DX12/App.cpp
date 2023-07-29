@@ -14,6 +14,8 @@ void App::Run()
 		
 		// render loop body
 
+		triangle.Draw(wnd.Gfx());
+
 		//wnd.Gfx().DrawTriangle();
 
 		// render loop body end
