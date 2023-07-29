@@ -9,6 +9,7 @@
 
 
 
+
 class Triangle
 {
 public:
@@ -82,10 +83,7 @@ public:
 
 			gfx.CommandList()->CopyResource(pVertexBuffer.Get(), pUploadVertexBuffer.Get());
 
-			gfx.CommandList()->Close();
-
-			ID3D12CommandList* commandLists[] = { gfx.CommandList().Get()};
-			gfx.CommandQueue()->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
+			gfx.Execute();
 
 			gfx.Sync();
 		}
@@ -158,6 +156,21 @@ public:
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		gfx.CommandList()->IASetVertexBuffers(0,1,&vertexBufferView);
+
+		// define scissor rect 
+		const CD3DX12_RECT scissorRect{ 0, 0, LONG_MAX, LONG_MAX };
+
+		// define viewport 
+		const CD3DX12_VIEWPORT viewport{ 0.0f, 0.0f, float(1600), float(900) };
+
+
+
+		gfx.CommandList()->RSSetViewports(1, &viewport);
+		gfx.CommandList()->RSSetScissorRects(1, &scissorRect);
+
+		gfx.CommandList()->OMSetRenderTargets(1, &gfx.rtv, TRUE, nullptr);
+
+
 		gfx.CommandList()->DrawInstanced(3, 1, 0, 0);
 
 		gfx.Execute();

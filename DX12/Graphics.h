@@ -76,8 +76,11 @@ private:
 	// viewport & scissor rect
 	CD3DX12_RECT scissorRect{ 0, 0, LONG_MAX, LONG_MAX };
 	CD3DX12_VIEWPORT viewport{ 0.0f, 0.0f, float(width), float(height) };
+public:
 
-	
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv;
+private:
+
 	uint64_t fenceValue = 0;
 	HANDLE fenceEvent;
 	// current back buffer index

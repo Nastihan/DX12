@@ -225,7 +225,7 @@ void Graphics::BeginFrame()
 	pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
 
 	// get rtv handle for the buffer used in this frame
-	const CD3DX12_CPU_DESCRIPTOR_HANDLE rtv{
+	rtv = {
 				rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 				(INT)curBackBufferIndex, rtvDescriptorSize };
 
