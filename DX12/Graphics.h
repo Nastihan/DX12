@@ -5,6 +5,7 @@
 #include <dxgi1_6.h>
 #include "GraphicsError.h"
 
+
 class Graphics
 {
 public:
@@ -41,6 +42,17 @@ public:
 			GetLastError() >> chk;
 		}
 	}
+	// static declartion of pso stream structure
+	struct PipelineStateStream
+	{
+		CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE RootSignature;
+		CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
+		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
+		CD3DX12_PIPELINE_STATE_STREAM_PS PS;
+		CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
+	};
+
 private:
 	// DX objects
 	Microsoft::WRL::ComPtr<ID3D12Device2> pDevice;

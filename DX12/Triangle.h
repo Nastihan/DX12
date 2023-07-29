@@ -9,7 +9,6 @@
 class Triangle
 {
 public:
-
 	Triangle(Graphics& gfx)
 	{
 		// Vertex data structure
@@ -95,7 +94,6 @@ public:
 			.StrideInBytes = sizeof(Vertex),
 		};
 
-		Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 		rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 		// serialize root signature
@@ -115,10 +113,21 @@ public:
 		gfx.Device()->CreateRootSignature(0, signatureBlob.Get(),
 			signatureBlob->GetBufferSize(), IID_PPV_ARGS(&pRootSignature));
 
+		// create pipeline state object
+		Graphics::PipelineStateStream pipelineStateStream;
+
+		// define the vertex input layout
+		const D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+			{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0 ,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
+			{"COLOR",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0}
+		};
 
 	}
 	void Draw(Graphics& gfx)
-	{
-		
+	{	
 	}
+private:
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pPipelineState;
+
 };
