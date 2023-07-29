@@ -2,6 +2,7 @@
 #include "Graphics.h"
 #include <DirectXMath.h>
 #include <array>
+#include <d3dcompiler.h>
 #include "d3dx12.h"
 #include "GraphicsError.h"
 #include <iostream>
@@ -121,6 +122,10 @@ public:
 			{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0 ,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
 			{"COLOR",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0}
 		};
+
+		// load the VS & PS
+		Microsoft::WRL::ComPtr<ID3DBlob> BlobVS;
+		D3DReadFileToBlob("VertexShader.cso", &BlobVS) >> chk;
 
 	}
 	void Draw(Graphics& gfx)
