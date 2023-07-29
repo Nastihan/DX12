@@ -4,6 +4,7 @@
 #include <array>
 #include "d3dx12.h"
 #include "GraphicsError.h"
+#include <iostream>
 
 class Triangle
 {
@@ -93,6 +94,28 @@ public:
 			.SizeInBytes = nVertices * sizeof(Vertex),
 			.StrideInBytes = sizeof(Vertex),
 		};
+
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
+		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
+		rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+		// serialize root signature
+		Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob;
+		Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
+		if (const auto hr = D3D12SerializeRootSignature(
+			&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_1,
+			&signatureBlob, &errorBlob); FAILED(hr)) {
+			if (errorBlob) {
+				auto errorBufferPtr = static_cast<const char*>(errorBlob->GetBufferPointer());
+
+				std::cout << " Error regarding Root Signature Serialization : " << errorBufferPtr << std::endl;
+			}
+			hr >> chk;
+		}
+		// Create root signature
+		gfx.Device()->CreateRootSignature(0, signatureBlob.Get(),
+			signatureBlob->GetBufferSize(), IID_PPV_ARGS(&pRootSignature));
+
+
 	}
 	void Draw(Graphics& gfx)
 	{
