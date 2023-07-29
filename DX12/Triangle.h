@@ -154,9 +154,13 @@ public:
 		gfx.CommandList()->Reset(gfx.CommandAllocator().Get(),nullptr) >> chk;
 		gfx.CommandList()->SetPipelineState(pPipelineState.Get());
 		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
+
+		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 		gfx.CommandList()->IASetVertexBuffers(0,1,&vertexBufferView);
 		gfx.CommandList()->DrawInstanced(3, 1, 0, 0);
 
+		gfx.Execute();
 		gfx.Sync();
 	}
 private:

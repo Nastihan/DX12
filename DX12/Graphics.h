@@ -43,6 +43,13 @@ public:
 			GetLastError() >> chk;
 		}
 	}
+	void Execute()
+	{
+		pCommandList->Close();
+
+		ID3D12CommandList* commandLists[] = { pCommandList.Get() };
+		pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
+	}
 	// static declartion of pso stream structure
 	struct PipelineStateStream
 	{

@@ -265,9 +265,6 @@ void Graphics::BeginFrame()
 	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
 		GetLastError() >> chk;
 	}
-
-	
-
 }
 
 void Graphics::EndFrame()
