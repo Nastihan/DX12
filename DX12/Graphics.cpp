@@ -3,11 +3,11 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include "d3dx12.h"
-
 #include <ranges>
 #include <stdexcept>
 #include <cmath>
 #include <numbers>
+#include <iostream>
 
 static float t = 0.f;
 constexpr float step = 0.01f;
@@ -29,9 +29,19 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&pdxgiFactory)) >> chk;
 	Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter;
 	pdxgiFactory->EnumAdapters(1U, pAdapter.GetAddressOf());
+	DXGI_ADAPTER_DESC desc;
+	pAdapter->GetDesc(&desc);
+	
+	std::cout << "Device description: ";
+	std::wcout << (std::wstring)desc.Description << std::endl;
 
 	// device
 	D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&pDevice)) >> chk;
+
+	// info queue for warning stuff
+	
+
+	
 
 	// command queue
 	D3D12_COMMAND_QUEUE_DESC cqDesc = {
@@ -142,10 +152,19 @@ void Graphics::DrawTriangle()
 			pDevice->CreateCommittedResource(&heapProps,
 				D3D12_HEAP_FLAG_NONE,
 				&desc,
-				D3D12_RESOURCE_STATE_COPY_DEST,
+				// D3D12_RESOURCE_STATE_COPY_DEST d3d12 turns this param to COMMON for effectivity
+				D3D12_RESOURCE_STATE_COMMON,
 				nullptr,
 				IID_PPV_ARGS(&pVertexBuffer)
 			) >> chk;
+
+
+			// uncomment to not get the warning every frame
+			/*auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(pVertexBuffer.Get(),
+				D3D12_RESOURCE_STATE_COMMON,
+				D3D12_RESOURCE_STATE_COPY_DEST
+			);
+			pCommandList->ResourceBarrier(1, &barrier);*/
 		}
 
 		// resource for cpu upload of the vertex data
@@ -169,10 +188,30 @@ void Graphics::DrawTriangle()
 			std::ranges::copy(vertices, mappedVertexData);
 			pUploadVertexBuffer->Unmap(0, nullptr);
 		}
+
 		pCommandAllocator->Reset() >> chk;
 		pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
 
+		pCommandList->CopyResource(pVertexBuffer.Get(), pUploadVertexBuffer.Get());
+
+		pCommandList->Close();
+
+		ID3D12CommandList* commandLists[] = { pCommandList.Get() };
+		pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
+
+		pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
+		pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
+		if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED)
+		{
+			GetLastError() >> chk;
+		}
 	}
+
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{
+		.BufferLocation = pVertexBuffer->GetGPUVirtualAddress(),
+		.SizeInBytes = nVertices * sizeof(Vertex),
+		.StrideInBytes = sizeof(Vertex),
+	};
 
 
 
@@ -213,7 +252,7 @@ void Graphics::BeginFrame()
 	{
 		pCommandList->Close();
 		ID3D12CommandList* const commandLists[] = { pCommandList.Get() };
-		pCommandQueue->ExecuteCommandLists(std::size(commandLists), commandLists);
+		pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
 	}
 	pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
 

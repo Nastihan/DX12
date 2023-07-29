@@ -11,15 +11,15 @@ void App::Run()
 	{
 		wnd.Gfx().BeginFrame();
 		
+		// render loop body
 
+		wnd.Gfx().DrawTriangle();
 
-
-
+		// render loop body end
 
 
 		wnd.Gfx().EndFrame();
 		glfwPollEvents();
-
 		if (glfwWindowShouldClose(&wnd.Wnd()))
 			wnd.Gfx().QueueEmpty();
 	}
