@@ -21,8 +21,8 @@ public:
 			DirectX::XMFLOAT3 pos;
 			DirectX::XMFLOAT3 color;
 		};
-
 		UINT nVertices;
+		// Vertex buffer stuff
 		{
 			// vertex data
 			const Vertex vertices[]{
@@ -77,23 +77,19 @@ public:
 				std::ranges::copy(vertices, mappedVertexData);
 				pUploadVertexBuffer->Unmap(0, nullptr);
 			}
-
-			gfx.CommandAllocator()->Reset() >> chk;
-			gfx.CommandList()->Reset(gfx.CommandAllocator().Get(), nullptr) >> chk;
-
+			gfx.ResetCmd();
 			gfx.CommandList()->CopyResource(pVertexBuffer.Get(), pUploadVertexBuffer.Get());
-
 			gfx.Execute();
-
 			gfx.Sync();
 		}
-
+		// vertex buffer view
 		vertexBufferView = {
 			.BufferLocation = pVertexBuffer->GetGPUVirtualAddress(),
 			.SizeInBytes = nVertices * (UINT)sizeof(Vertex),
 			.StrideInBytes = sizeof(Vertex),
 		};
 
+		// empty root signature
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 		rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 		// serialize root signature
@@ -125,7 +121,6 @@ public:
 		// load the VS & PS
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobVS;
 		D3DReadFileToBlob(L"VertexShader.cso", &BlobVS) >> chk;
-
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobPS;
 		D3DReadFileToBlob(L"PixelShader.cso", &BlobPS) >> chk;
 

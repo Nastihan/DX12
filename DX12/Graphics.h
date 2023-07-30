@@ -11,7 +11,6 @@ class Graphics
 {
 public:
 	Graphics(uint16_t width, uint16_t height,HWND hWnd);
-	void DrawTriangle();
 	void BeginFrame();
 	void EndFrame();
 	void QueueEmpty();
@@ -90,21 +89,18 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> pCommandList;
 	// fence
 	Microsoft::WRL::ComPtr<ID3D12Fence1> pFence;
+	uint64_t fenceValue = 0;
+	HANDLE fenceEvent;
 	// viewport & scissor rect
 	CD3DX12_RECT scissorRect;
 	CD3DX12_VIEWPORT viewport;
-public:
-
+	// rtv handle for the buffer used in frame
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv;
-private:
 
-	uint64_t fenceValue = 0;
-	HANDLE fenceEvent;
 	// current back buffer index
 	UINT curBackBufferIndex = 0;
 
-
-
+	// Width & Height
 	uint16_t width;
 	uint16_t height;
 };

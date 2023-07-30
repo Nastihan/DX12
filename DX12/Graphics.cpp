@@ -23,7 +23,6 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	D3D12GetDebugInterface(IID_PPV_ARGS(&pDebugController)) >> chk;
 	pDebugController->EnableDebugLayer();
 
-
 	// dxgi factory
 	Microsoft::WRL::ComPtr<IDXGIFactory4> pdxgiFactory;
 	CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&pdxgiFactory)) >> chk;
@@ -38,11 +37,6 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	// device
 	D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&pDevice)) >> chk;
 
-	// info queue for warning stuff
-	
-
-	
-
 	// command queue
 	D3D12_COMMAND_QUEUE_DESC cqDesc = {
 		.Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -51,7 +45,6 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		.NodeMask = 0,
 	};
 	pDevice->CreateCommandQueue(&cqDesc, IID_PPV_ARGS(&pCommandQueue)) >> chk;
-
 
 	// swap chain
 	{
@@ -123,96 +116,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	}
 }
 
-void Graphics::DrawTriangle()
-{
-	// Vertex data structure
-	struct Vertex
-	{
-		DirectX::XMFLOAT3 pos;
-		DirectX::XMFLOAT3 color;
-	};
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> pVertexBuffer;
-	UINT nVertices;
-	{
-		// vertex data
-		const Vertex vertices[]{
-				{ {  0.00f,  0.50f, 0.0f }, { 1.0f, 0.0f, 0.0f } }, // top 
-				{ {  0.43f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f } }, // right 
-				{ { -0.43f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f } }, // left 
-		};
-
-		nVertices = (UINT)std::size(vertices);
-
-		// commited resource for the vertex buffer on the gpu side
-		{
-			const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-			const auto desc =CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
-
-			pDevice->CreateCommittedResource(&heapProps,
-				D3D12_HEAP_FLAG_NONE,
-				&desc,
-				// D3D12_RESOURCE_STATE_COPY_DEST d3d12 turns this param to COMMON for effectivity
-				D3D12_RESOURCE_STATE_COMMON,
-				nullptr,
-				IID_PPV_ARGS(&pVertexBuffer)
-			) >> chk;
-
-
-			// uncomment to not get the warning every frame
-			/*auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(pVertexBuffer.Get(),
-				D3D12_RESOURCE_STATE_COMMON,
-				D3D12_RESOURCE_STATE_COPY_DEST
-			);
-			pCommandList->ResourceBarrier(1, &barrier);*/
-		}
-
-		// resource for cpu upload of the vertex data
-		Microsoft::WRL::ComPtr<ID3D12Resource> pUploadVertexBuffer;
-		{
-			const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-			const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
-
-			pDevice->CreateCommittedResource(&heapProps,
-				D3D12_HEAP_FLAG_NONE,
-				&desc,
-				D3D12_RESOURCE_STATE_GENERIC_READ,
-				nullptr,
-				IID_PPV_ARGS(&pUploadVertexBuffer)
-			) >> chk;
-		}
-		// copy the vertex data to uploadBuffer
-		{
-			Vertex* mappedVertexData = nullptr;
-			pUploadVertexBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mappedVertexData)) >> chk;
-			std::ranges::copy(vertices, mappedVertexData);
-			pUploadVertexBuffer->Unmap(0, nullptr);
-		}
-
-		pCommandAllocator->Reset() >> chk;
-		pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
-
-		pCommandList->CopyResource(pVertexBuffer.Get(), pUploadVertexBuffer.Get());
-
-		pCommandList->Close();
-
-		ID3D12CommandList* commandLists[] = { pCommandList.Get() };
-		pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
-
-		pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
-		pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
-		if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED)
-		{
-			GetLastError() >> chk;
-		}
-	}
-
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{
-		.BufferLocation = pVertexBuffer->GetGPUVirtualAddress(),
-		.SizeInBytes = nVertices * sizeof(Vertex),
-		.StrideInBytes = sizeof(Vertex),
-	};
-}
 
 void Graphics::BeginFrame()
 {
@@ -223,14 +127,11 @@ void Graphics::BeginFrame()
 
 	auto& backBuffer = pBackBuffers[curBackBufferIndex];
 	// reset command list and command allocator
-	pCommandAllocator->Reset() >> chk;
-	pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
+	ResetCmd();
 
 	// get rtv handle for the buffer used in this frame
-	rtv = {
-				rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-				(INT)curBackBufferIndex, rtvDescriptorSize };
-
+	rtv = {	rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+			 (INT)curBackBufferIndex, rtvDescriptorSize };
 	// clear the render target
 	{
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
@@ -246,26 +147,13 @@ void Graphics::BeginFrame()
 		// clear rtv
 		pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
-
-	
-	{
-		pCommandList->Close();
-		ID3D12CommandList* const commandLists[] = { pCommandList.Get() };
-		pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
-	}
-	pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
-
-
-	pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
-	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
-		GetLastError() >> chk;
-	}
+	Execute();
+	Sync();
 }
 
 void Graphics::EndFrame()
 {
-	pCommandAllocator->Reset() >> chk;
-	pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
+	ResetCmd();
 
 	// prepare buffer for presentation by transitioning to present state
 	auto& backBuffer = pBackBuffers[curBackBufferIndex];
@@ -274,9 +162,7 @@ void Graphics::EndFrame()
 	pCommandList->ResourceBarrier(1, &barrier);
 
 	// submit command list
-	pCommandList->Close() >> chk;
-	ID3D12CommandList* const commandLists[] = { pCommandList.Get() };
-	pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
+	Execute();
 
 	pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
 
