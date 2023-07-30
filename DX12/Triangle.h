@@ -152,7 +152,16 @@ public:
 		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		gfx.CommandList()->IASetVertexBuffers(0,1,&vertexBufferView);
-		// Lambda function to update the rotation matrix
+		auto mvp = DirectX::XMMatrixTranspose( GetTransform(gfx));
+		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
+		gfx.ConfigForDraw();
+		gfx.CommandList()->DrawInstanced(3, 1, 0, 0);
+
+		gfx.Execute();
+		gfx.Sync();
+	}
+	DirectX::XMMATRIX GetTransform(Graphics& gfx)
+	{
 		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
 		{
 			// Assuming rotationSpeed is the speed at which you want the triangle to rotate (in degrees per second)
@@ -171,17 +180,16 @@ public:
 			rotationAngle += rotationSpeed * deltaTime;
 
 			// Calculate the new rotation matrix
+			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 			DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rotationAngle));
 
-			return rotationMatrix;
+			return translation * rotationMatrix ;
 		};
-		const auto rotationMatrix = updateRotationMatrix();
-		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(rotationMatrix) / 4, &rotationMatrix, 0);
-		gfx.ConfigForDraw();
-		gfx.CommandList()->DrawInstanced(3, 1, 0, 0);
+		const auto model = updateRotationMatrix();
 
-		gfx.Execute();
-		gfx.Sync();
+		const auto MVP =  model * gfx.GetCamera() * gfx.GetProjection();
+
+		return MVP;
 	}
 private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;

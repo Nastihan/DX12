@@ -13,14 +13,14 @@ struct VS_Output
 
 struct MVP
 {
-    matrix mvp;
+    matrix transform;
 };
 ConstantBuffer<MVP> mvp : register(b0);
 
 VS_Output main( VS_Input input )
 {
     VS_Output output;
-    output.Position = mul(float4(input.pos, 1.0f), mvp.mvp);
+    output.Position = mul(float4(input.pos, 1.0f), mvp.transform);
     output.Color = float4(input.Color, 1.0f);
     return output;
 }
