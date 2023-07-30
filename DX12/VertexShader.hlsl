@@ -11,16 +11,16 @@ struct VS_Output
     float4 Color : COLOR;
 };
 
-struct rotation
+struct MVP
 {
-    matrix rot;
+    matrix mvp;
 };
-ConstantBuffer<rotation> rot : register(b0);
+ConstantBuffer<MVP> mvp : register(b0);
 
 VS_Output main( VS_Input input )
 {
     VS_Output output;
-    output.Position = mul(float4(input.pos, 1.0f), rot.rot);
+    output.Position = mul(float4(input.pos, 1.0f), mvp.mvp);
     output.Color = float4(input.Color, 1.0f);
     return output;
 }
