@@ -5,12 +5,16 @@
 #include <dxgi1_6.h>
 #include "GraphicsError.h"
 #include "d3dx12.h"
+#include <DirectXMath.h>
 
 
 class Graphics
 {
 public:
 	Graphics(uint16_t width, uint16_t height,HWND hWnd);
+	Graphics(const Graphics&) = delete;
+	Graphics& operator=(const Graphics&) = delete;
+	//~Graphics();
 	void BeginFrame();
 	void EndFrame();
 	void QueueEmpty();
@@ -76,6 +80,15 @@ public:
 		CD3DX12_PIPELINE_STATE_STREAM_PS PS;
 		CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
 	};
+
+	// getters and setter for view & projection matrices
+	void SetCamera(DirectX::FXMMATRIX cam) noexcept;
+	DirectX::XMMATRIX GetCamera() const noexcept;
+	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
+	DirectX::XMMATRIX GetProjection() const noexcept;
+private:
+	DirectX::XMMATRIX camera;
+	DirectX::XMMATRIX projection;
 
 private:
 	// DX objects

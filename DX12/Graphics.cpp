@@ -1,6 +1,5 @@
 #include "Graphics.h"
 #include <d3d12.h>
-#include <DirectXMath.h>
 #include <ranges>
 #include <stdexcept>
 #include <cmath>
@@ -186,4 +185,24 @@ void Graphics::QueueEmpty()
 	if (WaitForSingleObject(fenceEvent, 2000) == WAIT_FAILED) {
 		GetLastError() >> chk;
 	}
+}
+
+void Graphics::SetCamera(DirectX::FXMMATRIX cam) noexcept
+{
+	camera = cam;
+}
+
+DirectX::XMMATRIX Graphics::GetCamera() const noexcept
+{
+	return camera;
+}
+
+void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
+{
+	projection = proj;
+}
+
+DirectX::XMMATRIX Graphics::GetProjection() const noexcept
+{
+	return projection;
 }
