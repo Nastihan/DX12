@@ -6,8 +6,8 @@
 #include "d3dx12.h"
 #include "GraphicsError.h"
 #include <iostream>
-
-
+#include <DirectXMath.h>
+#include <chrono>
 
 
 class Triangle
@@ -89,9 +89,13 @@ public:
 			.StrideInBytes = sizeof(Vertex),
 		};
 
-		// empty root signature
+		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
+		CD3DX12_ROOT_PARAMETER rootParameters[1]{};
+		rootParameters[0].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-		rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+		rootSignatureDesc.Init((UINT)std::size(rootParameters), rootParameters, 
+			0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 		// serialize root signature
 		Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob;
 		Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
@@ -148,6 +152,31 @@ public:
 		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		gfx.CommandList()->IASetVertexBuffers(0,1,&vertexBufferView);
+		// Lambda function to update the rotation matrix
+		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
+		{
+			// Assuming rotationSpeed is the speed at which you want the triangle to rotate (in degrees per second)
+			static float rotationSpeed = 23.0f; // Adjust this value to control rotation speed
+			static float rotationAngle = 0.0f;
+			static std::chrono::steady_clock::time_point prevTime = std::chrono::steady_clock::now();
+
+			// Get the current time
+			auto currentTime = std::chrono::steady_clock::now();
+
+			// Calculate the time elapsed since the last frame
+			float deltaTime = std::chrono::duration<float>(currentTime - prevTime).count();
+			prevTime = currentTime;
+
+			// Update the rotation angle
+			rotationAngle += rotationSpeed * deltaTime;
+
+			// Calculate the new rotation matrix
+			DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rotationAngle));
+
+			return rotationMatrix;
+		};
+		const auto rotationMatrix = updateRotationMatrix();
+		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(rotationMatrix) / 4, &rotationMatrix, 0);
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawInstanced(3, 1, 0, 0);
 
