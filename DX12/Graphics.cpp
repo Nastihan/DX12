@@ -15,6 +15,8 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	width(width),height(height)
 {
 	constexpr UINT bufferCount = 2;
+	scissorRect = CD3DX12_RECT{ 0, 0, LONG_MAX, LONG_MAX };
+	viewport = CD3DX12_VIEWPORT{ 0.0f, 0.0f, float(width), float(height) };
 
 	// enable debug layer for d3d12
 	Microsoft::WRL::ComPtr<ID3D12Debug> pDebugController;
@@ -244,14 +246,7 @@ void Graphics::BeginFrame()
 		// clear rtv
 		pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
-	// universal configs
-	// configure RS
-	pCommandList->RSSetViewports(1, &viewport);
-	pCommandList->RSSetScissorRects(1, &scissorRect);
-	// set primitive topology
-	pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	// bind render target
-	pCommandList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+
 	
 	{
 		pCommandList->Close();

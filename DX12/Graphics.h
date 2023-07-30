@@ -33,7 +33,12 @@ public:
 	{
 		return pCommandList;
 	}
-	// synchronization function
+	// synchronization functions
+	void ResetCmd()
+	{
+		pCommandAllocator->Reset() >> chk;
+		pCommandList->Reset(pCommandAllocator.Get(), nullptr) >> chk;
+	}
 	void Sync()
 	{
 		pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
@@ -45,10 +50,22 @@ public:
 	}
 	void Execute()
 	{
-		pCommandList->Close();
+		pCommandList->Close() >> chk;
 
 		ID3D12CommandList* commandLists[] = { pCommandList.Get() };
 		pCommandQueue->ExecuteCommandLists((UINT)std::size(commandLists), commandLists);
+	}
+	// universal configs
+	void ConfigForDraw()
+	{
+		// universal configs
+		// configure RS
+		pCommandList->RSSetViewports(1, &viewport);
+		pCommandList->RSSetScissorRects(1, &scissorRect);
+		// set primitive topology
+		pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		// bind render target
+		pCommandList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
 	}
 	// static declartion of pso stream structure
 	struct PipelineStateStream
@@ -74,8 +91,8 @@ private:
 	// fence
 	Microsoft::WRL::ComPtr<ID3D12Fence1> pFence;
 	// viewport & scissor rect
-	CD3DX12_RECT scissorRect{ 0, 0, LONG_MAX, LONG_MAX };
-	CD3DX12_VIEWPORT viewport{ 0.0f, 0.0f, float(width), float(height) };
+	CD3DX12_RECT scissorRect;
+	CD3DX12_VIEWPORT viewport;
 public:
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv;
