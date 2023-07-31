@@ -19,6 +19,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{75a3d84e-a2fa-41a5-a35c-a83b9317fa5a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Drawables">
+      <UniqueIdentifier>{1070afed-9587-4751-be9d-3e553c481d44}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -54,7 +57,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Triangle.h">
-      <Filter>Header Files</Filter>
+      <Filter>Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Drawables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

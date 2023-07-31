@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "GraphicsError.h"
 #include "Triangle.h"
+#include "Cube.h"
 
 class App
 {
@@ -11,4 +12,5 @@ public:
 private:
 	Window wnd;
 	Triangle triangle;
+	Cube cube;
 };
