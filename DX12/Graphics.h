@@ -68,7 +68,7 @@ public:
 		// set primitive topology
 		pCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		// bind render target
-		pCommandList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+		pCommandList->OMSetRenderTargets(1, &rtv, TRUE, &dsv);
 	}
 	// static declartion of pso stream structure
 	struct PipelineStateStream
@@ -78,6 +78,7 @@ public:
 		CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
 		CD3DX12_PIPELINE_STATE_STREAM_VS VS;
 		CD3DX12_PIPELINE_STATE_STREAM_PS PS;
+		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
 		CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
 	};
 
@@ -89,15 +90,14 @@ public:
 private:
 	DirectX::XMMATRIX camera;
 	DirectX::XMMATRIX projection;
-
 private:
 	// DX objects
 	Microsoft::WRL::ComPtr<ID3D12Device2> pDevice;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> pCommandQueue;
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> pSwapChain;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
-	// !!!!!! note !!!!!! manually writing the buffer count
+	// !manually writing the buffer count
 	Microsoft::WRL::ComPtr<ID3D12Resource> pBackBuffers[2];
+	Microsoft::WRL::ComPtr<ID3D12Resource> pDepthBuffer;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> pCommandAllocator;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> pCommandList;
 	// fence
@@ -107,12 +107,16 @@ private:
 	// viewport & scissor rect
 	CD3DX12_RECT scissorRect;
 	CD3DX12_VIEWPORT viewport;
+	// rt and ds descriptor heaps
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
+
 	// rtv handle for the buffer used in frame
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv;
 
 	// current back buffer index
 	UINT curBackBufferIndex = 0;
-
 	// Width & Height
 	uint16_t width;
 	uint16_t height;

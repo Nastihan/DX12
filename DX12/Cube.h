@@ -197,6 +197,7 @@ public:
 		pipelineStateStream.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(BlobVS.Get());
 		pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(BlobPS.Get());
+		pipelineStateStream.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 		pipelineStateStream.RTVFormats = {
 			.RTFormats{ DXGI_FORMAT_R8G8B8A8_UNORM },
 			.NumRenderTargets = 1,
@@ -224,7 +225,7 @@ public:
 		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
 		{
 			// Assuming rotationSpeed is the speed at which you want the triangle to rotate (in degrees per second)
-			static float rotationSpeed = 20.0f; // Adjust this value to control rotation speed
+			static float rotationSpeed = 40.0f; // Adjust this value to control rotation speed
 			static float rotationAngle = 0.0f;
 			static std::chrono::steady_clock::time_point prevTime = std::chrono::steady_clock::now();
 

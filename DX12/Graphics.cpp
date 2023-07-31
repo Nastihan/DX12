@@ -94,14 +94,48 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 
 	// rtv descriptors and buffer references
 	{
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		rtv = (rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 		for (int i = 0; i < bufferCount; i++)
 		{
 			pSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffers[i])) >> chk;
-			pDevice->CreateRenderTargetView(pBackBuffers[i].Get(), nullptr, rtvHandle);
-			rtvHandle.Offset(rtvDescriptorSize);
+			pDevice->CreateRenderTargetView(pBackBuffers[i].Get(), nullptr, rtv);
+			rtv.Offset(rtvDescriptorSize);
 		}
 	}
+
+	// depth buffer
+	{
+		const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT,
+			width, height,
+			1, 0, 1, 0,
+			D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+		);
+		const D3D12_CLEAR_VALUE clearValue = {
+				.Format = DXGI_FORMAT_D32_FLOAT,
+				.DepthStencil = { 1.0f, 0 },
+		};
+		pDevice->CreateCommittedResource(&heapProps,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDesc,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&clearValue,
+			IID_PPV_ARGS(&pDepthBuffer)
+		) >> chk;
+	}
+
+	// dsv descriptor heap
+	{
+		const D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {
+			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
+			.NumDescriptors = 1,
+		};
+		pDevice->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&dsvDescriptorHeap)) >> chk;
+	}
+
+	// dsv and handle
+	dsv = { dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart() };
+	pDevice->CreateDepthStencilView(pDepthBuffer.Get(), nullptr, dsv);
 
 	// command allocater
 	pDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&pCommandAllocator)) >> chk;
@@ -137,8 +171,9 @@ void Graphics::BeginFrame()
 	ResetCmd();
 
 	// get rtv handle for the buffer used in this frame
-	rtv = {	rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			 (INT)curBackBufferIndex, rtvDescriptorSize };
+	rtv = {
+			rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+			(INT)curBackBufferIndex, rtvDescriptorSize };
 	// clear the render target
 	{
 		const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
@@ -154,6 +189,7 @@ void Graphics::BeginFrame()
 		// clear rtv
 		pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
+	pCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	Execute();
 	Sync();
 }
