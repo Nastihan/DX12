@@ -220,6 +220,36 @@ public:
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
+		// temporary lambda
+		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
+		{
+			// Assuming rotationSpeed is the speed at which you want the triangle to rotate (in degrees per second)
+			static float rotationSpeed = 20.0f; // Adjust this value to control rotation speed
+			static float rotationAngle = 0.0f;
+			static std::chrono::steady_clock::time_point prevTime = std::chrono::steady_clock::now();
+
+			// Get the current time
+			auto currentTime = std::chrono::steady_clock::now();
+
+			// Calculate the time elapsed since the last frame
+			float deltaTime = std::chrono::duration<float>(currentTime - prevTime).count();
+			prevTime = currentTime;
+
+			// Update the rotation angle
+			rotationAngle += rotationSpeed * deltaTime;
+
+			// Calculate the new rotation matrix
+			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+			DirectX::XMMATRIX rotationMatrix =
+				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
+				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle));
+
+			return  rotationMatrix * translation;
+		};
+		const auto model = updateRotationMatrix();
+		const auto MVP =  DirectX::XMMatrixTranspose(model * gfx.GetCamera() * gfx.GetProjection());
+		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(MVP) / 4, &MVP, 0);
+		gfx.CommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
 
 		gfx.Execute();
 		gfx.Sync();
