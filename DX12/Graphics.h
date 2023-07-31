@@ -92,7 +92,7 @@ private:
 	DirectX::XMMATRIX projection;
 private:
 	// DX objects
-	Microsoft::WRL::ComPtr<ID3D12Device2> pDevice;
+	Microsoft::WRL::ComPtr<ID3D12Device5> pDevice;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> pCommandQueue;
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> pSwapChain;
 	// !manually writing the buffer count

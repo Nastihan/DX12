@@ -23,7 +23,6 @@ void App::Run()
 	while (!glfwWindowShouldClose(&wnd.Wnd()))
 	{
 		wnd.Gfx().BeginFrame();
-		
 		// render loop body
 
 		//triangle.Draw(wnd.Gfx());
@@ -31,9 +30,8 @@ void App::Run()
 
 		//wnd.Gfx().DrawTriangle();
 
+
 		// render loop body end
-
-
 		wnd.Gfx().EndFrame();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(&wnd.Wnd()))
