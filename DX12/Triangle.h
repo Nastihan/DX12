@@ -187,7 +187,7 @@ public:
 		};
 		const auto model = updateRotationMatrix();
 
-		const auto MVP =  model * gfx.GetCamera() * gfx.GetProjection();
+		const auto MVP = model *  gfx.GetCamera() * gfx.GetProjection();
 
 		return MVP;
 	}

@@ -17,14 +17,22 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	scissorRect = CD3DX12_RECT{ 0, 0, LONG_MAX, LONG_MAX };
 	viewport = CD3DX12_VIEWPORT{ 0.0f, 0.0f, float(width), float(height) };
 
+#ifndef NDEBUG
 	// enable debug layer for d3d12
 	Microsoft::WRL::ComPtr<ID3D12Debug> pDebugController;
 	D3D12GetDebugInterface(IID_PPV_ARGS(&pDebugController)) >> chk;
 	pDebugController->EnableDebugLayer();
+#endif 
+	
+	UINT factoryFlags = 0U;
+	
+#ifndef NDEBUG
+	factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
+#endif 
 
 	// dxgi factory
 	Microsoft::WRL::ComPtr<IDXGIFactory4> pdxgiFactory;
-	CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&pdxgiFactory)) >> chk;
+	CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&pdxgiFactory)) >> chk;
 	Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter;
 	pdxgiFactory->EnumAdapters(1U, pAdapter.GetAddressOf());
 	DXGI_ADAPTER_DESC desc;
