@@ -2,13 +2,13 @@
 struct VS_Input
 {
     float3 pos : POSITION;
-    float3 Color : COLOR;
+    float2 tc : TEXCOORD;
 };
 
 struct VS_Output
 {
     float4 Position : SV_Position;
-    float4 Color : COLOR;
+    float2 tc : TEXCOORD;
 };
 
 struct MVP
@@ -21,6 +21,6 @@ VS_Output main( VS_Input input )
 {
     VS_Output output;
     output.Position = mul(float4(input.pos, 1.0f), mvp.transform);
-    output.Color = float4(input.Color, 1.0f);
+    output.tc = input.tc;
     return output;
 }

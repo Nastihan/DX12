@@ -11,6 +11,6 @@ public:
 	void Run();
 private:
 	Window wnd;
-	Triangle triangle;
+	//Triangle triangle;
 	Cube cube;
 };

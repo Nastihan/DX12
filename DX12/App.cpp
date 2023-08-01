@@ -2,7 +2,7 @@
 
 App::App()
 	: wnd(1600, 900, "DX12"),
-	triangle(wnd.Gfx()),
+	//triangle(wnd.Gfx()),
 	cube(wnd.Gfx())
 {
 

@@ -1,11 +1,13 @@
+Texture2D tex : register(t0);
+SamplerState smplr : register(s0);
 
 struct PS_Input
 {
     float4 Position : SV_Position;
-    float4 Color : COLOR;
+    float2 tc : TEXCOORD;
 };
 
 float4 main(PS_Input input) : SV_TARGET
 {
-    return input.Color;
+    return tex.Sample(smplr, input.tc);
 }

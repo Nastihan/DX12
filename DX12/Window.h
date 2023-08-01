@@ -1,5 +1,6 @@
 #pragma once
-#include <GLFW/include/GLFW/glfw3.h>
+#include <initguid.h> 
+#include <glfw/include/GLFW/glfw3.h>
 #include <memory>
 #include <string>
 #include <Windows.h>

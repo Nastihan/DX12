@@ -1,14 +1,14 @@
 #pragma once
+
 #include "Graphics.h"
 #include <DirectXMath.h>
 #include <array>
 #include <d3dcompiler.h>
-#include "d3dx12.h"
 #include "GraphicsError.h"
-#include <iostream>
 #include <DirectXMath.h>
 #include <chrono>
 #include <DxTex/include/DirectXTex.h>
+#include <ranges>
 
 class Cube
 {
@@ -137,7 +137,7 @@ public:
 				WORD* mappedIndexData = nullptr;
 				pUploadIndexBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndexData)) >> chk;
 				std::ranges::copy(indices, mappedIndexData);
-				pUploadIndexBuffer->Unmap(0,nullptr);
+				pUploadIndexBuffer->Unmap(0, nullptr);
 			}
 			gfx.ResetCmd();
 			gfx.CommandList()->CopyResource(pIndexBuffer.Get(), pUploadIndexBuffer.Get());
@@ -152,19 +152,116 @@ public:
 		};
 		// cube texture
 		{
-			//DirectX:
+			// load image data
+			DirectX::ScratchImage image;
+			DirectX::LoadFromWICFile(L"Model\\wood.jpg", DirectX::WIC_FLAGS_NONE, nullptr, image) >> chk;
+			// generate mip chain
+			DirectX::ScratchImage mipChain;
+			DirectX::GenerateMipMaps(*image.GetImages(), DirectX::TEX_FILTER_BOX, 0, mipChain) >> chk;
 
+			// texture resource
+			{
+				const auto& chainBase = *mipChain.GetImages();
+				CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+					chainBase.format,
+					(UINT)chainBase.width,
+					(UINT)chainBase.height
+				);
+				gfx.Device()->CreateCommittedResource(
+					&heapProps,
+					D3D12_HEAP_FLAG_NONE,
+					&resourceDesc,
+					D3D12_RESOURCE_STATE_COPY_DEST,
+					nullptr,
+					IID_PPV_ARGS(&pCubeTexture)) >> chk;
+			}
 
+			const auto temp = mipChain.GetImageCount();
+
+			// collect subresource data 
+			const auto subresourceData = std::ranges::views::iota(0, (int)mipChain.GetImageCount()) |
+				std::ranges::views::transform([&](int i) {
+				const auto img = mipChain.GetImage(i, 0, 0);
+				return D3D12_SUBRESOURCE_DATA{
+					.pData = img->pixels,
+					.RowPitch = (LONG_PTR)img->rowPitch,
+					.SlicePitch = (LONG_PTR)img->slicePitch,
+				};
+					}) |
+				std::ranges::to<std::vector>();
+
+			Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
+			{
+				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
+				const auto uploadBufferSize = GetRequiredIntermediateSize(pCubeTexture.Get(), 0, (UINT)subresourceData.size());
+				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
+				gfx.Device()->CreateCommittedResource(
+					&heapProps,
+					D3D12_HEAP_FLAG_NONE,
+					&resourceDesc,
+					D3D12_RESOURCE_STATE_GENERIC_READ,
+					nullptr,
+					IID_PPV_ARGS(&pUploadBuffer)
+				) >> chk;
+			}
+			gfx.ResetCmd();
+			// write commands to copy data to upload texture (copying each subresource) 
+			UpdateSubresources(gfx.CommandList().Get(),
+				pCubeTexture.Get(), pUploadBuffer.Get(),
+				0, 0,
+				(UINT)subresourceData.size(),
+				subresourceData.data()
+			);
+			{
+				// write command to transition texture to texture state  
+				const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+					pCubeTexture.Get(),
+					D3D12_RESOURCE_STATE_COPY_DEST,
+					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+				);
+				gfx.CommandList()->ResourceBarrier(1, &barrier);
+			}
+			gfx.Execute();
+			gfx.Sync();
+		}
+		// descriptor heap for the shader resource view
+		{
+			const D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{
+				.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+				.NumDescriptors = 1,
+				.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+			};
+			gfx.Device()->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap)) >> chk;
 		}
 
+		// create handle to the srv heap and to the only view in the heap 
+		srvHandle = (srvHeap->GetCPUDescriptorHandleForHeapStart());
+		// create the descriptor in the heap 
+		{
+			const D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{
+				.Format = pCubeTexture->GetDesc().Format,
+				.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
+				.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+				.Texture2D{.MipLevels = pCubeTexture->GetDesc().MipLevels },
+			};
+			gfx.Device()->CreateShaderResourceView(pCubeTexture.Get(), &srvDesc, srvHandle);
+		}
+		
 
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
-		CD3DX12_ROOT_PARAMETER rootParameters[1]{};
+		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
 		rootParameters[0].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-
+		{
+			CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
+			rootParameters[1].InitAsDescriptorTable(1, &descRange);
+		}
+		// static sampler
+		const CD3DX12_STATIC_SAMPLER_DESC sampler{ 0 };
+		// root signature init
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 		rootSignatureDesc.Init((UINT)std::size(rootParameters), rootParameters,
-			0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+			1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 		// serialize root signature
 		Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob;
 		Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
@@ -188,7 +285,7 @@ public:
 		// define the vertex input layout
 		const D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
 			{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0 ,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
-			{"COLOR",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0}
+			{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		};
 
 		// load the VS & PS
@@ -223,40 +320,15 @@ public:
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		gfx.CommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 		gfx.CommandList()->IASetIndexBuffer(&indexBufferView);
+		// bind the heap containing the texture descriptor 
+		gfx.CommandList()->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
+		// bind the descriptor table containing the texture descriptor 
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, srvHeap->GetGPUDescriptorHandleForHeapStart());
 		auto mvp = DirectX::XMMatrixTranspose(GetTransform(gfx));
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
-		// temporary lambda
-		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
-		{
-			// Assuming rotationSpeed is the speed at which you want the triangle to rotate (in degrees per second)
-			static float rotationSpeed = 40.0f; // Adjust this value to control rotation speed
-			static float rotationAngle = 0.0f;
-			static std::chrono::steady_clock::time_point prevTime = std::chrono::steady_clock::now();
 
-			// Get the current time
-			auto currentTime = std::chrono::steady_clock::now();
-
-			// Calculate the time elapsed since the last frame
-			float deltaTime = std::chrono::duration<float>(currentTime - prevTime).count();
-			prevTime = currentTime;
-
-			// Update the rotation angle
-			rotationAngle += rotationSpeed * deltaTime;
-
-			// Calculate the new rotation matrix
-			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-			DirectX::XMMATRIX rotationMatrix =
-				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
-				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle));
-
-			return  rotationMatrix * translation;
-		};
-		const auto model = updateRotationMatrix();
-		const auto MVP =  DirectX::XMMatrixTranspose(model * gfx.GetCamera() * gfx.GetProjection());
-		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(MVP) / 4, &MVP, 0);
-		gfx.CommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
 
 		gfx.Execute();
 		gfx.Sync();
@@ -306,6 +378,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pIndexBuffer;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView;
 	// texture
-	Microsoft::WRL::ComPtr<ID3D12Resource> cubeTexture;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pCubeTexture;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle;
 
 };
