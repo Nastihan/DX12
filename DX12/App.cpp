@@ -28,8 +28,6 @@ void App::Run()
 		//triangle.Draw(wnd.Gfx());
 		cube.Draw(wnd.Gfx());
 
-		//wnd.Gfx().DrawTriangle();
-
 
 		// render loop body end
 		wnd.Gfx().EndFrame();
