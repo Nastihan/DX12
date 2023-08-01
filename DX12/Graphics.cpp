@@ -19,9 +19,10 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 
 #ifndef NDEBUG
 	// enable debug layer for d3d12
-	Microsoft::WRL::ComPtr<ID3D12Debug> pDebugController;
+	Microsoft::WRL::ComPtr<ID3D12Debug1> pDebugController;
 	D3D12GetDebugInterface(IID_PPV_ARGS(&pDebugController)) >> chk;
 	pDebugController->EnableDebugLayer();
+	pDebugController->SetEnableGPUBasedValidation(true);
 #endif 
 	
 	UINT factoryFlags = 0U;
