@@ -8,7 +8,7 @@
 #include <iostream>
 #include <DirectXMath.h>
 #include <chrono>
-
+#include <DxTex/include/DirectXTex.h>
 
 class Cube
 {
@@ -19,21 +19,21 @@ public:
 		struct Vertex
 		{
 			DirectX::XMFLOAT3 pos;
-			DirectX::XMFLOAT3 color;
+			DirectX::XMFLOAT2 tc;
 		};
 		UINT nVertices;
 		// Vertex buffer stuff
 		{
 			// vertex data
 			const Vertex vertices[] = {
-				{ {-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 0.0f} }, // 0 
-				{ {-1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f} }, // 1 
-				{ {1.0f,  1.0f, -1.0f}, {1.0f, 1.0f, 0.0f} }, // 2 
-				{ {1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f} }, // 3 
-				{ {-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, 1.0f} }, // 4 
-				{ {-1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 1.0f} }, // 5 
-				{ {1.0f,  1.0f,  1.0f}, {1.0f, 1.0f, 1.0f} }, // 6 
-				{ {1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 1.0f} }  // 7 
+				{ {-1.0f, -1.0f, -1.0f}, { 0.f, 0.f } }, // 0 
+				{ {-1.0f,  1.0f, -1.0f}, { 0.f, 1.f } }, // 1 
+				{ {1.0f,  1.0f, -1.0f}, { 1.f, 1.f } }, // 2 
+				{ {1.0f, -1.0f, -1.0f}, { 1.f, 0.f } }, // 3 
+				{ {-1.0f, -1.0f,  1.0f}, { 0.f, 1.f } }, // 4 
+				{ {-1.0f,  1.0f,  1.0f}, { 0.f, 0.f } }, // 5 
+				{ {1.0f,  1.0f,  1.0f}, { 1.f, 0.f } }, // 6 
+				{ {1.0f, -1.0f,  1.0f}, { 1.f, 1.f } }  // 7 
 			};
 
 			nVertices = (UINT)std::size(vertices);
@@ -144,12 +144,18 @@ public:
 			gfx.Execute();
 			gfx.Sync();
 		}
-		// create index buffer view
+		// index buffer view
 		indexBufferView = {
 			.BufferLocation = pIndexBuffer->GetGPUVirtualAddress(),
 			.SizeInBytes = nIndices * (UINT)sizeof(WORD),
 			.Format = DXGI_FORMAT_R16_UINT,
 		};
+		// cube texture
+		{
+			//DirectX:
+
+
+		}
 
 
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
@@ -299,6 +305,7 @@ private:
 	// index buffer 
 	Microsoft::WRL::ComPtr<ID3D12Resource> pIndexBuffer;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView;
-
+	// texture
+	Microsoft::WRL::ComPtr<ID3D12Resource> cubeTexture;
 
 };

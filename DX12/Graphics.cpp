@@ -38,7 +38,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter;
 	pdxgiFactory->EnumAdapters(1U, pAdapter.GetAddressOf());
 	DXGI_ADAPTER_DESC desc;
-	pAdapter->GetDesc(&desc);
+ 	pAdapter->GetDesc(&desc);
 	
 	std::cout << "Device description: ";
 	std::wcout << (std::wstring)desc.Description << std::endl;
