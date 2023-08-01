@@ -1,4 +1,5 @@
 #include "App.h"
+#include <DirectXTex.h>
 
 App::App()
 	: wnd(1600, 900, "DX12"),

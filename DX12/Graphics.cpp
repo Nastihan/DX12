@@ -6,6 +6,7 @@
 #include <numbers>
 #include <iostream>
 
+
 static float t = 0.f;
 constexpr float step = 0.01f;
 
