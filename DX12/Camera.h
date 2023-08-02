@@ -7,6 +7,7 @@ public:
 	Camera();
 	DirectX::XMMATRIX GetMatrix();
 	void Translate(DirectX::XMFLOAT3 translation);
+	void Rotate(float dx, float dy);
 private:
 	DirectX::XMMATRIX view;
 	DirectX::XMFLOAT3 pos{0.0, 0.0f, -0.5f};

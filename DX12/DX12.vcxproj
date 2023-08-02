@@ -182,6 +182,7 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="GraphicsError.h" />
+    <ClInclude Include="NastihanMath.h" />
     <ClInclude Include="NastihanTimer.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Window.h" />

@@ -21,7 +21,7 @@ void App::DoFrame()
 
 	//triangle.Draw(wnd.Gfx());
 	cube.Draw(wnd.Gfx());
-
+	       
 
 	// render loop body end
 	wnd.Gfx().EndFrame();
@@ -31,7 +31,11 @@ void App::Run()
 {
 	while (!glfwWindowShouldClose(&wnd.Wnd()))
 	{
-		const auto dt = timer.Mark() * 1.0f;
+		auto dt = timer.Mark() * 1.0f;
+		if (glfwGetKey(&wnd.Wnd(),GLFW_KEY_SPACE) == GLFW_PRESS)
+		{ 
+			dt = 0;
+		}
 		cam.Translate({ 0,0,-dt });
 
 		DoFrame();
