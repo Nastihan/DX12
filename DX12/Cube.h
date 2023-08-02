@@ -26,14 +26,43 @@ public:
 		{
 			// vertex data
 			const Vertex vertices[] = {
-				{ {-1.0f, -1.0f, -1.0f}, { 0.f, 0.f } }, // 0 
-				{ {-1.0f,  1.0f, -1.0f}, { 0.f, 1.f } }, // 1 
-				{ {1.0f,  1.0f, -1.0f}, { 1.f, 1.f } }, // 2 
-				{ {1.0f, -1.0f, -1.0f}, { 1.f, 0.f } }, // 3 
-				{ {-1.0f, -1.0f,  1.0f}, { 0.f, 1.f } }, // 4 
-				{ {-1.0f,  1.0f,  1.0f}, { 0.f, 0.f } }, // 5 
-				{ {1.0f,  1.0f,  1.0f}, { 1.f, 0.f } }, // 6 
-				{ {1.0f, -1.0f,  1.0f}, { 1.f, 1.f } }  // 7 
+					// Front face
+					{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (0)
+					{ { 1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (1)
+					{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 0.0f } }, // Top-left (2)
+					{ { 1.0f, 1.0f, -1.0f }, { 1.0f, 0.0f } }, // Top-right (3)
+
+					// Back face
+					{ { -1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f } },  // Bottom-left (4)
+					{ { 1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f } },  // Bottom-right (5)
+					{ { -1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },  // Top-left (6)
+					{ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },  // Top-right (7)
+
+					// Left face
+					{ { -1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-left (8)
+					{ { -1.0f, 1.0f, -1.0f }, { 1.0f, 0.0f } }, // Top-left (9)
+					{ { -1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f } }, // Bottom-right (10)
+					{ { -1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-right (11)
+
+					// Right face
+					{ { 1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (12)
+					{ { 1.0f, 1.0f, -1.0f }, { 0.0f, 0.0f } }, // Top-left (13)
+					{ { 1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f } }, // Bottom-right (14)
+					{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (15)
+
+					// Bottom face
+					{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (20)
+					{ { 1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (21)
+					{ { -1.0f, -1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-left (22)
+					{ { 1.0f, -1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (23)
+
+					// Top face
+					{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (16)
+					{ { 1.0f, 1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (17)
+					{ { -1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-left (18)
+					{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (19)
+
+	
 			};
 
 			nVertices = (UINT)std::size(vertices);
@@ -98,12 +127,12 @@ public:
 		{
 			// index data
 			const WORD indices[] = {
-				0, 1, 2, 0, 2, 3,
-				4, 6, 5, 4, 7, 6,
-				4, 5, 1, 4, 1, 0,
-				3, 2, 6, 3, 6, 7,
-				1, 5, 6, 1, 6, 2,
-				4, 0, 3, 4, 3, 7,
+				0,2, 1,    2,3,1,
+				4,5, 7,    4,7,6,
+				8,10, 9,  10,11,9,
+				12,13,15, 12,15,14,
+				16,17,18, 18,17,19,
+				20,23,21, 20,22,23
 			};
 			nIndices = (UINT)std::size(indices);
 
@@ -234,7 +263,6 @@ public:
 			};
 			gfx.Device()->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap)) >> chk;
 		}
-
 		// create handle to the srv heap and to the only view in the heap 
 		srvHandle = (srvHeap->GetCPUDescriptorHandleForHeapStart());
 		// create the descriptor in the heap 
@@ -248,20 +276,25 @@ public:
 			gfx.Device()->CreateShaderResourceView(pCubeTexture.Get(), &srvDesc, srvHandle);
 		}
 		
-
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
 		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
 		rootParameters[0].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-		{
-			CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
-			rootParameters[1].InitAsDescriptorTable(1, &descRange);
-		}
+		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
+		rootParameters[1].InitAsDescriptorTable(1, &descRange);
+		
 		// static sampler
 		const CD3DX12_STATIC_SAMPLER_DESC sampler{ 0 };
-		// root signature init
-		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
+		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+		// Allow input layout and vertex shader and deny unnecessary access to certain pipeline stages.
+		const D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_MESH_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_AMPLIFICATION_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 		rootSignatureDesc.Init((UINT)std::size(rootParameters), rootParameters,
-			1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+			1, &sampler, rootSignatureFlags);
 		// serialize root signature
 		Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob;
 		Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
@@ -277,7 +310,7 @@ public:
 		}
 		// Create root signature
 		gfx.Device()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
-			signatureBlob->GetBufferSize(), IID_PPV_ARGS(&pRootSignature));
+			signatureBlob->GetBufferSize(), IID_PPV_ARGS(&pRootSignature)) >> chk;
 
 		// create pso structure
 		Graphics::PipelineStateStream pipelineStateStream;
