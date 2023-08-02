@@ -13,22 +13,29 @@ App::App()
 
 }
 
+void App::DoFrame()
+{
+	wnd.Gfx().BeginFrame();
+	wnd.Gfx().SetCamera(cam.GetMatrix());
+	// render loop body
+
+	//triangle.Draw(wnd.Gfx());
+	cube.Draw(wnd.Gfx());
+
+
+	// render loop body end
+	wnd.Gfx().EndFrame();
+}
+
 void App::Run()
 {
 	while (!glfwWindowShouldClose(&wnd.Wnd()))
 	{
 		const auto dt = timer.Mark() * 1.0f;
 		cam.Translate({ 0,0,-dt });
-		wnd.Gfx().BeginFrame();
-		wnd.Gfx().SetCamera(cam.GetMatrix());
-		// render loop body
 
-		//triangle.Draw(wnd.Gfx());
-		cube.Draw(wnd.Gfx());
+		DoFrame();
 
-
-		// render loop body end
-		wnd.Gfx().EndFrame();
 		glfwPollEvents();
 		if (glfwWindowShouldClose(&wnd.Wnd()))
 			wnd.Gfx().QueueEmpty();

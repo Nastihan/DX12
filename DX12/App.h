@@ -10,6 +10,7 @@ class App
 {
 public:
 	App();
+	void DoFrame();
 	void Run();
 private:
 	Window wnd;
