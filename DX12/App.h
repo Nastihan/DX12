@@ -10,8 +10,10 @@ class App
 {
 public:
 	App();
-	void DoFrame();
 	void Run();
+private:
+	void DoFrame();
+	void HandleInput(float dt);
 private:
 	Window wnd;
 	NastihanTimer timer;

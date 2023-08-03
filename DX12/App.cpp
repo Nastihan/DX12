@@ -7,10 +7,7 @@ App::App()
 {
 
 	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f/16.0f, 0.5f, 100.f));
-	cam.Translate({ 0,0, +1 });
-	DirectX::XMMATRIX view = cam.GetMatrix();
-	wnd.Gfx().SetCamera(cam.GetMatrix());
-
+	
 }
 
 void App::DoFrame()
@@ -27,17 +24,44 @@ void App::DoFrame()
 	wnd.Gfx().EndFrame();
 }
 
+void App::HandleInput(float dt)
+{
+	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_W) == GLFW_PRESS)
+	{
+		cam.Translate({ 0.0f,0.0f,dt });
+	}
+	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_S) == GLFW_PRESS)
+	{
+		cam.Translate({ 0.0f,0.0f,-dt });
+	}
+	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_A) == GLFW_PRESS)
+	{
+		cam.Translate({ -dt,0.0f,0.0f });
+	}
+	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_D) == GLFW_PRESS)
+	{
+		cam.Translate({ dt,0.0f,0.0f });
+	}
+	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_R) == GLFW_PRESS)
+	{
+		cam.Translate({ 0.0f,dt,0.0f });
+	}
+	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_F) == GLFW_PRESS)
+	{
+		cam.Translate({ 0.0f,-dt,0.0f });
+	}
+}
+
 void App::Run()
 {
 	while (!glfwWindowShouldClose(&wnd.Wnd()))
 	{
-		auto dt = timer.Mark() * 1.0f;
-		if (glfwGetKey(&wnd.Wnd(),GLFW_KEY_SPACE) == GLFW_PRESS)
-		{ 
+		auto dt = timer.Mark() * 2.0f;
+		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_SPACE) == GLFW_PRESS)
+		{
 			dt = 0;
 		}
-		cam.Translate({ 0,0,-dt });
-
+		HandleInput(dt);
 		DoFrame();
 
 		glfwPollEvents();
