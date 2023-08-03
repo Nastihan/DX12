@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)ThirdParty\DxTex\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\DxTex\include;$(ProjectDir)\imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)ThirdParty\DxTex\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\DxTex\include;$(ProjectDir)\imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)ThirdParty\DxTex\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\DxTex\include;$(ProjectDir)\imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)ThirdParty\DxTex\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ThirdParty\DxTex\include;$(ProjectDir)\imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,7 +89,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty;$(ProjectDir)\imgui</AdditionalIncludeDirectories>
       <ExceptionHandling>Sync</ExceptionHandling>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -97,7 +97,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\DX12\ThirdParty\glfw\lib-vc2022;C:\dev\DX12\ThirdParty\DxTex\bin\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\dev\DX12\ThirdParty\glfw\lib-vc2022;C:\dev\DX12\ThirdParty\DxTex\bin\Debug;%(AdditionalLibraryDirectories);C:\dev\DX12\ThirdParty\imgui</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -110,7 +110,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty;$(ProjectDir)\imgui</AdditionalIncludeDirectories>
       <ExceptionHandling>Sync</ExceptionHandling>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <Optimization>MaxSpeed</Optimization>
@@ -120,7 +120,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\DX12\ThirdParty\glfw\lib-vc2022;C:\dev\DX12\ThirdParty\DxTex\bin\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\dev\DX12\ThirdParty\glfw\lib-vc2022;C:\dev\DX12\ThirdParty\DxTex\bin\Release;%(AdditionalLibraryDirectories);C:\dev\DX12\ThirdParty\imgui</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty;$(ProjectDir)\imgui</AdditionalIncludeDirectories>
       <ExceptionHandling>Sync</ExceptionHandling>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -139,7 +139,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\DX12\ThirdParty\glfw\lib-vc2022;C:\dev\DX12\ThirdParty\DxTex\bin\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\dev\DX12\ThirdParty\glfw\lib-vc2022;C:\dev\DX12\ThirdParty\DxTex\bin\Debug;%(AdditionalLibraryDirectories);C:\dev\DX12\ThirdParty\imgui</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -152,7 +152,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ThirdParty\glfw\include;$(SolutionDir)ThirdParty;$(ProjectDir)\imgui</AdditionalIncludeDirectories>
       <ExceptionHandling>Sync</ExceptionHandling>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <Optimization>MaxSpeed</Optimization>
@@ -162,7 +162,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\DX12\ThirdParty\glfw\lib-vc2022;C:\dev\DX12\ThirdParty\DxTex\bin\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\dev\DX12\ThirdParty\glfw\lib-vc2022;C:\dev\DX12\ThirdParty\DxTex\bin\Release;%(AdditionalLibraryDirectories);C:\dev\DX12\ThirdParty\imgui</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
