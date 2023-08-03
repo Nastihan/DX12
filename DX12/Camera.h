@@ -13,4 +13,5 @@ private:
 	DirectX::XMFLOAT3 pos{0.0, 0.0f, -0.5f};
 	float pitch;
 	float yaw;
+	static constexpr float rotationSpeed = 0.004f;
 };

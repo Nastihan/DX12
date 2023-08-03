@@ -14,9 +14,15 @@ public:
 	Graphics& Gfx();
 	GLFWwindow& Wnd();
 	HWND& Hwnd();
+	void EnableCursor();
+	void DisableCursor();
+	bool CursorEnabled();
+	DirectX::XMFLOAT2 GetMouseDelta(float x,float y);
 
 private:
-
+	bool cursorEnabled = true;
+	float lastMouseX;
+	float lastMouseY;
 	std::unique_ptr<Graphics> pGfx;
 	GLFWwindow* pWindow;
 	uint16_t width;

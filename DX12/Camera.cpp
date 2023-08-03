@@ -27,6 +27,11 @@ DirectX::XMMATRIX Camera::GetMatrix()
 
 void Camera::Translate(DirectX::XMFLOAT3 translation)
 {
+	namespace dx = DirectX;
+	dx::XMStoreFloat3(&translation, dx::XMVector3Transform(
+		dx::XMLoadFloat3(&translation),
+		dx::XMMatrixRotationRollPitchYaw(pitch, yaw, 0.0f) 
+	));
 	pos = {
 		pos.x + translation.x,
 		pos.y + translation.y,
@@ -37,6 +42,6 @@ void Camera::Translate(DirectX::XMFLOAT3 translation)
 
 void Camera::Rotate(float dx, float dy)
 {
-	yaw = wrap_angle(yaw + dx);
-	pitch = std::clamp(pitch + dx, 0.995f * -PI / 2.0f, 0.995f * PI / 2.0f);
+	yaw = wrap_angle(yaw + dx * rotationSpeed);
+	pitch = std::clamp(pitch + dy * rotationSpeed,  -PI / 2.0f, PI / 2.0f);
 }

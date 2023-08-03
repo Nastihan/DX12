@@ -7,6 +7,7 @@ App::App()
 {
 
 	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f/16.0f, 0.5f, 100.f));
+	wnd.Gfx().SetCamera(cam.GetMatrix());
 	
 }
 
@@ -26,29 +27,57 @@ void App::DoFrame()
 
 void App::HandleInput(float dt)
 {
-	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_W) == GLFW_PRESS)
-	{
-		cam.Translate({ 0.0f,0.0f,dt });
+	static bool spaceKeyPressedPrev = false;
+	bool spaceKeyPressed = glfwGetKey(&wnd.Wnd(), GLFW_KEY_SPACE) == GLFW_PRESS;
+	if (spaceKeyPressed && !spaceKeyPressedPrev) {
+		// Toggle cursor state
+		if (wnd.CursorEnabled()) {
+			wnd.DisableCursor();
+		}
+		else {
+			wnd.EnableCursor();
+		}
 	}
-	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_S) == GLFW_PRESS)
+	spaceKeyPressedPrev = spaceKeyPressed;
+
+
+	if (!wnd.CursorEnabled())
 	{
-		cam.Translate({ 0.0f,0.0f,-dt });
+		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_W) == GLFW_PRESS)
+		{
+			cam.Translate({ 0.0f,0.0f,dt });
+		}
+		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_S) == GLFW_PRESS)
+		{
+			cam.Translate({ 0.0f,0.0f,-dt });
+		}
+		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_A) == GLFW_PRESS)
+		{
+			cam.Translate({ -dt,0.0f,0.0f });
+		}
+		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_D) == GLFW_PRESS)
+		{
+			cam.Translate({ dt,0.0f,0.0f });
+		}
+		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_R) == GLFW_PRESS)
+		{
+			cam.Translate({ 0.0f,dt,0.0f });
+		}
+		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_F) == GLFW_PRESS)
+		{
+			cam.Translate({ 0.0f,-dt,0.0f });
+		}
+
 	}
-	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_A) == GLFW_PRESS)
+	
 	{
-		cam.Translate({ -dt,0.0f,0.0f });
-	}
-	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_D) == GLFW_PRESS)
-	{
-		cam.Translate({ dt,0.0f,0.0f });
-	}
-	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_R) == GLFW_PRESS)
-	{
-		cam.Translate({ 0.0f,dt,0.0f });
-	}
-	if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_F) == GLFW_PRESS)
-	{
-		cam.Translate({ 0.0f,-dt,0.0f });
+		double mouseX, mouseY;
+		glfwGetCursorPos(&wnd.Wnd(), &mouseX, &mouseY);
+		const auto delta = wnd.GetMouseDelta(mouseX, mouseY);
+		if (!wnd.CursorEnabled())
+		{
+			cam.Rotate((float)delta.x, (float)delta.y);
+		}
 	}
 }
 
@@ -56,11 +85,7 @@ void App::Run()
 {
 	while (!glfwWindowShouldClose(&wnd.Wnd()))
 	{
-		auto dt = timer.Mark() * 2.0f;
-		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_SPACE) == GLFW_PRESS)
-		{
-			dt = 0;
-		}
+		auto dt = timer.Mark() * 4.0f;
 		HandleInput(dt);
 		DoFrame();
 

@@ -12,6 +12,8 @@ Window::Window(uint16_t width, uint16_t height, std::string title)
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     pWindow = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+    
+    glfwGetCursorPos(pWindow, reinterpret_cast<double*>(& lastMouseX),reinterpret_cast<double*>(& lastMouseY));
 
     pGfx = std::make_unique<Graphics>(width, height, glfwGetWin32Window(pWindow));
 }
@@ -39,4 +41,31 @@ HWND& Window::Hwnd()
 {
     HWND hwnd = glfwGetWin32Window(pWindow);
     return hwnd;
+}
+
+void Window::EnableCursor()
+{
+    cursorEnabled = true;
+    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+void Window::DisableCursor()
+{
+    cursorEnabled = false;
+    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+bool Window::CursorEnabled()
+{
+    return cursorEnabled;
+}
+
+DirectX::XMFLOAT2 Window::GetMouseDelta(float x, float y)
+{
+    DirectX::XMFLOAT2 mouseDelta{};
+    mouseDelta.x = x - lastMouseX;
+    mouseDelta.y = y - lastMouseY;
+    lastMouseX = x;
+    lastMouseY = y;
+    return mouseDelta;
 }
