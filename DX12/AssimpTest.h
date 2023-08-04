@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Graphics.h"
 #include <DirectXMath.h>
 #include <array>
@@ -9,68 +8,48 @@
 #include <chrono>
 #include <DxTex/include/DirectXTex.h>
 #include <ranges>
+#include <iostream>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
-class Cube
+class AssimpTest
 {
 public:
-	Cube(Graphics& gfx)
+	AssimpTest(Graphics& gfx)
 	{
+		Assimp::Importer imp;
+		const auto pModel = imp.ReadFile("Models\\suzanne.obj", 
+			aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+		
+		const auto pMesh = pModel->mMeshes[0];
+
 		// Vertex data structure
 		struct Vertex
 		{
 			DirectX::XMFLOAT3 pos;
-			DirectX::XMFLOAT2 tc;
+			DirectX::XMFLOAT3 n;
 		};
 		UINT nVertices;
 		// Vertex buffer stuff
 		{
-			// vertex data
-			const Vertex vertices[] = {
-					// Front face
-					{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (0)
-					{ { 1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (1)
-					{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 0.0f } }, // Top-left (2)
-					{ { 1.0f, 1.0f, -1.0f }, { 1.0f, 0.0f } }, // Top-right (3)
+			std::vector<Vertex> vertices;
+			vertices.reserve(pMesh->mNumVertices);
 
-					// Back face
-					{ { -1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f } },  // Bottom-left (4)
-					{ { 1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f } },  // Bottom-right (5)
-					{ { -1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },  // Top-left (6)
-					{ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },  // Top-right (7)
+			for (unsigned int i = 0; i < pMesh->mNumVertices; i++)
+			{
+				vertices.push_back({
+					{ pMesh->mVertices[i].x,pMesh->mVertices[i].y, pMesh->mVertices[i].z },
+					{ *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mNormals[i]) }
+					});
+			}
 
-					// Left face
-					{ { -1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-left (8)
-					{ { -1.0f, 1.0f, -1.0f }, { 1.0f, 0.0f } }, // Top-left (9)
-					{ { -1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f } }, // Bottom-right (10)
-					{ { -1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-right (11)
-
-					// Right face
-					{ { 1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (12)
-					{ { 1.0f, 1.0f, -1.0f }, { 0.0f, 0.0f } }, // Top-left (13)
-					{ { 1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f } }, // Bottom-right (14)
-					{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (15)
-
-					// Bottom face
-					{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (20)
-					{ { 1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (21)
-					{ { -1.0f, -1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-left (22)
-					{ { 1.0f, -1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (23)
-
-					// Top face
-					{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (16)
-					{ { 1.0f, 1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (17)
-					{ { -1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-left (18)
-					{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (19)
-
-	
-			};
-
-			nVertices = (UINT)std::size(vertices);
+			nVertices = (UINT)vertices.size();
 
 			// commited resource for the vertex buffer on the gpu side
 			{
 				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-				const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
+				const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(Vertex) * vertices.size());
 
 				gfx.Device()->CreateCommittedResource(&heapProps,
 					D3D12_HEAP_FLAG_NONE,
@@ -94,7 +73,7 @@ public:
 			Microsoft::WRL::ComPtr<ID3D12Resource> pUploadVertexBuffer;
 			{
 				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-				const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
+				const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(Vertex) * vertices.size());
 
 				gfx.Device()->CreateCommittedResource(&heapProps,
 					D3D12_HEAP_FLAG_NONE,
@@ -108,7 +87,10 @@ public:
 			{
 				Vertex* mappedVertexData = nullptr;
 				pUploadVertexBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mappedVertexData)) >> chk;
-				std::ranges::copy(vertices, mappedVertexData);
+
+				// Use std::ranges::copy with a range adaptor to convert the vector into a range
+				std::ranges::copy(vertices | std::views::transform([](const Vertex& v) { return v; }), mappedVertexData);
+
 				pUploadVertexBuffer->Unmap(0, nullptr);
 			}
 			gfx.ResetCmd();
@@ -125,21 +107,27 @@ public:
 		// Index buffer stuff
 		UINT nIndices;
 		{
+			std::vector<WORD> indices;
+			indices.reserve(pMesh->mNumFaces * 3);
 			// index data
-			const WORD indices[] = {
-				0,2, 1,    2,3,1,
-				4,5, 7,    4,7,6,
-				8,10, 9,  10,11,9,
-				12,13,15, 12,15,14,
-				16,17,18, 18,17,19,
-				20,23,21, 20,22,23
-			};
+			
+			for (unsigned int i = 0; i < pMesh->mNumFaces; i++)
+			{
+				const auto face = pMesh->mFaces[i];
+				assert(face.mNumIndices == 3);
+				indices.push_back(face.mIndices[0]);
+				indices.push_back(face.mIndices[1]);
+				indices.push_back(face.mIndices[2]);
+			}
+
 			nIndices = (UINT)std::size(indices);
+
+			indexCountPerInstance = nIndices;
 
 			// create commited resource for index buffer
 			{
 				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices));
+				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(WORD) * indices.size());
 				gfx.Device()->CreateCommittedResource(&heapProps,
 					D3D12_HEAP_FLAG_NONE,
 					&resourceDesc,
@@ -152,7 +140,7 @@ public:
 			Microsoft::WRL::ComPtr<ID3D12Resource> pUploadIndexBuffer;
 			{
 				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices));
+				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(WORD) * indices.size());
 				gfx.Device()->CreateCommittedResource(&heapProps,
 					D3D12_HEAP_FLAG_NONE,
 					&resourceDesc,
@@ -220,39 +208,39 @@ public:
 					}) |
 				std::ranges::to<std::vector>();
 
-			Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
-			{
-				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-				const auto uploadBufferSize = GetRequiredIntermediateSize(pCubeTexture.Get(), 0, (UINT)subresourceData.size());
-				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
-				gfx.Device()->CreateCommittedResource(
-					&heapProps,
-					D3D12_HEAP_FLAG_NONE,
-					&resourceDesc,
-					D3D12_RESOURCE_STATE_GENERIC_READ,
-					nullptr,
-					IID_PPV_ARGS(&pUploadBuffer)
-				) >> chk;
-			}
-			gfx.ResetCmd();
-			// write commands to copy data to upload texture (copying each subresource) 
-			UpdateSubresources(gfx.CommandList().Get(),
-				pCubeTexture.Get(), pUploadBuffer.Get(),
-				0, 0,
-				(UINT)subresourceData.size(),
-				subresourceData.data()
-			);
-			{
-				// write command to transition texture to texture state  
-				const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-					pCubeTexture.Get(),
-					D3D12_RESOURCE_STATE_COPY_DEST,
-					D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-				);
-				gfx.CommandList()->ResourceBarrier(1, &barrier);
-			}
-			gfx.Execute();
-			gfx.Sync();
+					Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
+					{
+						const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
+						const auto uploadBufferSize = GetRequiredIntermediateSize(pCubeTexture.Get(), 0, (UINT)subresourceData.size());
+						const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
+						gfx.Device()->CreateCommittedResource(
+							&heapProps,
+							D3D12_HEAP_FLAG_NONE,
+							&resourceDesc,
+							D3D12_RESOURCE_STATE_GENERIC_READ,
+							nullptr,
+							IID_PPV_ARGS(&pUploadBuffer)
+						) >> chk;
+					}
+					gfx.ResetCmd();
+					// write commands to copy data to upload texture (copying each subresource) 
+					UpdateSubresources(gfx.CommandList().Get(),
+						pCubeTexture.Get(), pUploadBuffer.Get(),
+						0, 0,
+						(UINT)subresourceData.size(),
+						subresourceData.data()
+					);
+					{
+						// write command to transition texture to texture state  
+						const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+							pCubeTexture.Get(),
+							D3D12_RESOURCE_STATE_COPY_DEST,
+							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
+						);
+						gfx.CommandList()->ResourceBarrier(1, &barrier);
+					}
+					gfx.Execute();
+					gfx.Sync();
 		}
 		// descriptor heap for the shader resource view
 		{
@@ -275,13 +263,13 @@ public:
 			};
 			gfx.Device()->CreateShaderResourceView(pCubeTexture.Get(), &srvDesc, srvHandle);
 		}
-		
+
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
 		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
 		rootParameters[0].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
 		rootParameters[1].InitAsDescriptorTable(1, &descRange);
-		
+
 		// static sampler
 		const CD3DX12_STATIC_SAMPLER_DESC sampler{ 0 };
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
@@ -318,14 +306,14 @@ public:
 		// define the vertex input layout
 		const D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
 			{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0 ,D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0},
-			{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		};
 
 		// load the VS & PS
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobVS;
-		D3DReadFileToBlob(L"VertexShader.cso", &BlobVS) >> chk;
+		D3DReadFileToBlob(L"ModelVS.cso", &BlobVS) >> chk;
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobPS;
-		D3DReadFileToBlob(L"PixelShader.cso", &BlobPS) >> chk;
+		D3DReadFileToBlob(L"ModelPS.cso", &BlobPS) >> chk;
 
 		// filling pso structure
 		pipelineStateStream.RootSignature = pRootSignature.Get();
@@ -360,7 +348,7 @@ public:
 		auto mvp = DirectX::XMMatrixTranspose(GetTransform(gfx));
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
 		gfx.ConfigForDraw();
-		gfx.CommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
+		gfx.CommandList()->DrawIndexedInstanced(indexCountPerInstance, 1, 0, 0, 0);
 
 
 		gfx.Execute();
@@ -387,10 +375,10 @@ public:
 
 			// Calculate the new rotation matrix
 			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-			DirectX::XMMATRIX rotationMatrix = 
+			DirectX::XMMATRIX rotationMatrix =
 				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
-					* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))
-						* DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rotationAngle));
+				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))
+				* DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rotationAngle));
 
 			return  rotationMatrix * translation;
 		};
@@ -414,5 +402,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pCubeTexture;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle;
+
+	UINT indexCountPerInstance;
 
 };

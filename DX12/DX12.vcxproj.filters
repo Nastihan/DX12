@@ -131,12 +131,21 @@
     <ClInclude Include="ImguiManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AssimpTest.h">
+      <Filter>Drawables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="PixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ModelVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ModelPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

@@ -1,10 +1,12 @@
 #include "App.h"
 #include "imgui/imgui.h"
-#include <assimp/Importer.hpp>
+
+
 
 App::App()
 	: wnd(1600, 900, "DX12"),
-	cube(wnd.Gfx())
+	//cube(wnd.Gfx()),
+	test(wnd.Gfx())
 {
 	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f/16.0f, 0.5f, 100.f));
 	wnd.Gfx().SetCamera(cam.GetMatrix());
@@ -17,8 +19,8 @@ void App::DoFrame()
 	wnd.Gfx().SetCamera(cam.GetMatrix());
 	// render loop body
 
-	//triangle.Draw(wnd.Gfx());
-	cube.Draw(wnd.Gfx());
+	//cube.Draw(wnd.Gfx());
+	test.Draw(wnd.Gfx());
 
 	if (showDemoWindow)
 	{
