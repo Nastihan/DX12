@@ -2,6 +2,7 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <stdexcept>
+#include "imgui/imgui_impl_glfw.h"
 
 Window::Window(uint16_t width, uint16_t height, std::string title)
     : width(width), height(height)
@@ -15,11 +16,15 @@ Window::Window(uint16_t width, uint16_t height, std::string title)
     
     glfwGetCursorPos(pWindow, reinterpret_cast<double*>(& lastMouseX),reinterpret_cast<double*>(& lastMouseY));
 
+    // init imgui glfw
+    ImGui_ImplGlfw_InitForOther(pWindow, true);
+    // graphics object
     pGfx = std::make_unique<Graphics>(width, height, glfwGetWin32Window(pWindow));
 }
 
 Window::~Window()
 {
+    ImGui_ImplGlfw_Shutdown();
     glfwDestroyWindow(pWindow);
     glfwTerminate();
 }

@@ -5,7 +5,7 @@
 #include <cmath>
 #include <numbers>
 #include <iostream>
-
+#include "imgui/imgui_impl_dx12.h"
 
 static float t = 0.f;
 constexpr float step = 0.01f;
@@ -105,6 +105,17 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		}
 	}
 
+	// srv descriptor heap for imgui
+	{
+		const D3D12_DESCRIPTOR_HEAP_DESC desc =
+		{
+			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			.NumDescriptors = 1,
+			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+		};
+		pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&srvDescriptorHeap)) >> chk;
+	}
+
 	// depth buffer
 	{
 		const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
@@ -157,9 +168,21 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		GetLastError() >> chk;
 		throw std::runtime_error("failed to create fence event");
 	}
+
+	// init imgui dx12 impl
+	ImGui_ImplDX12_Init(pDevice.Get(), bufferCount, DXGI_FORMAT_R8G8B8A8_UNORM,
+		srvDescriptorHeap.Get(),
+		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()
+	);
 }
 
 
+
+Graphics::~Graphics()
+{
+	ImGui_ImplDX12_Shutdown();
+}
 
 void Graphics::BeginFrame()
 {

@@ -1,7 +1,10 @@
 #include "App.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_dx12.h"
+
 App::App()
 	: wnd(1600, 900, "DX12"),
-	//triangle(wnd.Gfx()),
 	cube(wnd.Gfx())
 {
 	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f/16.0f, 0.5f, 100.f));
@@ -17,7 +20,23 @@ void App::DoFrame()
 
 	//triangle.Draw(wnd.Gfx());
 	cube.Draw(wnd.Gfx());
-	       
+
+	// imgui 
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	
+	ImGui::ShowDemoWindow();
+	
+
+	ImGui::Render();
+	wnd.Gfx().ResetCmd();
+	wnd.Gfx().ImguiConfig();
+	wnd.Gfx().ConfigForDraw();
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),wnd.Gfx().CommandList().Get());
+	wnd.Gfx().Execute();
+	wnd.Gfx().Sync();
 
 	// render loop body end
 	wnd.Gfx().EndFrame();
@@ -71,7 +90,7 @@ void App::HandleInput(float dt)
 	{
 		double mouseX, mouseY;
 		glfwGetCursorPos(&wnd.Wnd(), &mouseX, &mouseY);
-		const auto delta = wnd.GetMouseDelta(mouseX, mouseY);
+		const auto delta = wnd.GetMouseDelta((float)mouseX,(float)mouseY);
 		if (!wnd.CursorEnabled())
 		{
 			cam.Rotate((float)delta.x, (float)delta.y);

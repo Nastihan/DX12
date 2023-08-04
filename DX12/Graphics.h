@@ -14,7 +14,7 @@ public:
 	Graphics(uint16_t width, uint16_t height,HWND hWnd);
 	Graphics(const Graphics&) = delete;
 	Graphics& operator=(const Graphics&) = delete;
-	//~Graphics();
+	~Graphics();
 	void BeginFrame();
 	void EndFrame();
 	void QueueEmpty();
@@ -70,6 +70,10 @@ public:
 		// bind render target
 		pCommandList->OMSetRenderTargets(1, &rtv, TRUE, &dsv);
 	}
+	void ImguiConfig()
+	{
+		pCommandList->SetDescriptorHeaps(1, srvDescriptorHeap.GetAddressOf());
+	}
 	// static declartion of pso stream structure
 	struct PipelineStateStream
 	{
@@ -110,6 +114,7 @@ private:
 	// rt and ds descriptor heaps
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap;
 
 	// rtv handle for the buffer used in frame
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv;

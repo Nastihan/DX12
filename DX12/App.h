@@ -20,6 +20,5 @@ private:
 	Window wnd;
 	NastihanTimer timer;
 	Camera cam;
-	//Triangle triangle;
 	Cube cube;
 };
