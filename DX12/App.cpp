@@ -1,6 +1,6 @@
 #include "App.h"
 #include "imgui/imgui.h"
-
+#include <assimp/Importer.hpp>
 
 App::App()
 	: wnd(1600, 900, "DX12"),
