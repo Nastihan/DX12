@@ -21,4 +21,5 @@ private:
 	NastihanTimer timer;
 	Camera cam;
 	Cube cube;
+	bool showDemoWindow = true;
 };

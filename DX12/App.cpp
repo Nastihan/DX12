@@ -1,7 +1,6 @@
 #include "App.h"
 #include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_dx12.h"
+
 
 App::App()
 	: wnd(1600, 900, "DX12"),
@@ -21,22 +20,10 @@ void App::DoFrame()
 	//triangle.Draw(wnd.Gfx());
 	cube.Draw(wnd.Gfx());
 
-	// imgui 
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
-	
-	ImGui::ShowDemoWindow();
-	
-
-	ImGui::Render();
-	wnd.Gfx().ResetCmd();
-	wnd.Gfx().ImguiConfig();
-	wnd.Gfx().ConfigForDraw();
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(),wnd.Gfx().CommandList().Get());
-	wnd.Gfx().Execute();
-	wnd.Gfx().Sync();
+	if (showDemoWindow)
+	{
+		ImGui::ShowDemoWindow(&showDemoWindow);
+	}
 
 	// render loop body end
 	wnd.Gfx().EndFrame();

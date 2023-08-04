@@ -6,6 +6,7 @@
 #include <numbers>
 #include <iostream>
 #include "imgui/imgui_impl_dx12.h"
+#include "imgui/imgui_impl_glfw.h"
 
 static float t = 0.f;
 constexpr float step = 0.01f;
@@ -177,8 +178,6 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	);
 }
 
-
-
 Graphics::~Graphics()
 {
 	ImGui_ImplDX12_Shutdown();
@@ -186,6 +185,14 @@ Graphics::~Graphics()
 
 void Graphics::BeginFrame()
 {
+	// imgui frame begin
+	if (imguiEnabled)
+	{
+		ImGui_ImplDX12_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+	}
+
 	// advance backbuffer
 	curBackBufferIndex = pSwapChain->GetCurrentBackBufferIndex();
 	// 
@@ -222,6 +229,15 @@ void Graphics::BeginFrame()
 void Graphics::EndFrame()
 {
 	ResetCmd();
+
+	// imgui frame end
+	if (imguiEnabled)
+	{
+		ImGui::Render();
+		ImguiConfig();
+		ConfigForDraw();
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
+	}
 
 	// prepare buffer for presentation by transitioning to present state
 	auto& backBuffer = pBackBuffers[curBackBufferIndex];
@@ -274,4 +290,19 @@ void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
 DirectX::XMMATRIX Graphics::GetProjection() const noexcept
 {
 	return projection;
+}
+
+void Graphics::EnableImgui() noexcept
+{
+	imguiEnabled = true;
+}
+
+void Graphics::DisableImgui() noexcept
+{
+	imguiEnabled = false;
+}
+
+bool Graphics::IsImguiEnabled() const noexcept
+{
+	return imguiEnabled;
 }

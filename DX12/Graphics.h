@@ -85,13 +85,16 @@ public:
 		CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
 		CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
 	};
-
 	// getters and setter for view & projection matrices
 	void SetCamera(DirectX::FXMMATRIX cam) noexcept;
 	DirectX::XMMATRIX GetCamera() const noexcept;
 	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 	DirectX::XMMATRIX GetProjection() const noexcept;
+	void EnableImgui() noexcept;
+	void DisableImgui() noexcept;
+	bool IsImguiEnabled() const noexcept;
 private:
+	bool imguiEnabled = true;
 	DirectX::XMMATRIX camera;
 	DirectX::XMMATRIX projection;
 private:
