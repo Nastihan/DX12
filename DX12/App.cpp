@@ -4,7 +4,7 @@
 
 
 App::App()
-	: wnd(1600, 900, "DX12"),
+	: wnd(2200, 1237.5, "DX12"),
 	//cube(wnd.Gfx()),
 	test(wnd.Gfx())
 {
