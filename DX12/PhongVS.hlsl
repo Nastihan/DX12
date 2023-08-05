@@ -7,8 +7,9 @@ struct VS_Input
 
 struct VS_Output
 {
-    float4 Position : SV_Position;
-    float3 n : NORMAL;
+    float3 viewPos : Position;
+    float3 viewNormal : NORMAL;
+    float4 pos : SV_Position;
 };
 
 struct MVP
@@ -22,7 +23,8 @@ ConstantBuffer<MVP> mvp : register(b0);
 VS_Output main(VS_Input input)
 {
     VS_Output output;
-    output.Position = mul(float4(input.pos, 1.0f), mvp.modelViewProj);
-    output.n = mul(input.n, (float3x3) mvp.model);
+    output.viewPos = (float3) mul(float4(input.pos, 1.0f), mvp.modelView);
+    output.viewNormal = mul(input.n, (float3x3) mvp.modelView);
+    output.pos = mul(float4(input.pos, 1.0f), mvp.modelViewProj);
     return output;
 }

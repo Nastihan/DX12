@@ -1,8 +1,9 @@
 
 struct PS_Input
 {
-    float4 Position : SV_Position;
-    float2 n : NORMAL;
+    float3 viewFragPos : Position;
+    float3 viewNormal : NORMAL;
+    float4 pos : SV_Position;
 };
 
 float4 main(PS_Input input) : SV_TARGET
