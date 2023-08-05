@@ -25,6 +25,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{61aa0204-39a7-4ca5-8b41-596720b91ede}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\ShaderIncludes">
+      <UniqueIdentifier>{85f54a3f-2192-4fae-953a-47aefee28e46}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -148,5 +151,10 @@
     <FxCompile Include="ModelPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ShaderOps.hlsli">
+      <Filter>Shaders\ShaderIncludes</Filter>
+    </None>
   </ItemGroup>
 </Project>
