@@ -28,6 +28,12 @@
     <Filter Include="Shaders\ShaderIncludes">
       <UniqueIdentifier>{85f54a3f-2192-4fae-953a-47aefee28e46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Phong">
+      <UniqueIdentifier>{c11dcfad-e496-4955-b096-c872c6156ef3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BindableAbstract">
+      <UniqueIdentifier>{dec025ca-00d3-4536-b1d0-f5a6d6a3874e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -74,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="ImguiManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformCbuf.cpp">
+      <Filter>BindableAbstract</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +146,9 @@
     <ClInclude Include="AssimpTest.h">
       <Filter>Drawables</Filter>
     </ClInclude>
+    <ClInclude Include="TransformCbuf.h">
+      <Filter>BindableAbstract</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">
@@ -150,6 +162,12 @@
     </FxCompile>
     <FxCompile Include="ModelPS.hlsl">
       <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PhongVS.hlsl">
+      <Filter>Shaders\Phong</Filter>
+    </FxCompile>
+    <FxCompile Include="PhongPS.hlsl">
+      <Filter>Shaders\Phong</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -12,6 +12,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "TransformCbuf.h"
 
 class AssimpTest
 {
@@ -266,7 +267,7 @@ public:
 
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
 		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
-		rootParameters[0].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+		rootParameters[0].InitAsConstants(3 * (sizeof(DirectX::XMMATRIX) / 4), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
 		rootParameters[1].InitAsDescriptorTable(1, &descRange);
 
@@ -311,9 +312,9 @@ public:
 
 		// load the VS & PS
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobVS;
-		D3DReadFileToBlob(L"ModelVS.cso", &BlobVS) >> chk;
+		D3DReadFileToBlob(L"PhongVS.cso", &BlobVS) >> chk;
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobPS;
-		D3DReadFileToBlob(L"ModelPS.cso", &BlobPS) >> chk;
+		D3DReadFileToBlob(L"PhongPS.cso", &BlobPS) >> chk;
 
 		// filling pso structure
 		pipelineStateStream.RootSignature = pRootSignature.Get();
@@ -345,7 +346,9 @@ public:
 		gfx.CommandList()->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
 		// bind the descriptor table containing the texture descriptor 
 		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, srvHeap->GetGPUDescriptorHandleForHeapStart());
-		auto mvp = DirectX::XMMatrixTranspose(GetTransform(gfx));
+		// transforms
+		std::unique_ptr<TransformCbuf> transform = std::make_unique<TransformCbuf>(*this);
+		auto mvp = transform->GetTransforms(gfx);
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(indexCountPerInstance, 1, 0, 0, 0);
@@ -384,9 +387,7 @@ public:
 		};
 		const auto model = updateRotationMatrix();
 
-		const auto MVP = model * gfx.GetCamera() * gfx.GetProjection();
-
-		return MVP;
+		return model;
 	}
 private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
