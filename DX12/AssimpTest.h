@@ -31,7 +31,6 @@ public:
 			DirectX::XMFLOAT3 pos;
 			DirectX::XMFLOAT3 n;
 		};
-
 		// Vertex buffer stuff
 		{
 			std::vector<Vertex> vertices;
@@ -48,12 +47,11 @@ public:
 
 		
 		// Index buffer stuff
-		UINT nIndices;
 		{
 			std::vector<WORD> indices;
 			indices.reserve(pMesh->mNumFaces * 3);
 			// index data
-			
+
 			for (unsigned int i = 0; i < pMesh->mNumFaces; i++)
 			{
 				const auto face = pMesh->mFaces[i];
@@ -63,53 +61,8 @@ public:
 				indices.push_back(face.mIndices[2]);
 			}
 
-			nIndices = (UINT)std::size(indices);
-
-			indexCountPerInstance = nIndices;
-
-			// create commited resource for index buffer
-			{
-				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(WORD) * indices.size());
-				gfx.Device()->CreateCommittedResource(&heapProps,
-					D3D12_HEAP_FLAG_NONE,
-					&resourceDesc,
-					D3D12_RESOURCE_STATE_COMMON,
-					nullptr,
-					IID_PPV_ARGS(&pIndexBuffer)
-				) >> chk;
-			}
-			// create commited resource for cpu upload of the vertex data
-			Microsoft::WRL::ComPtr<ID3D12Resource> pUploadIndexBuffer;
-			{
-				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(WORD) * indices.size());
-				gfx.Device()->CreateCommittedResource(&heapProps,
-					D3D12_HEAP_FLAG_NONE,
-					&resourceDesc,
-					D3D12_RESOURCE_STATE_GENERIC_READ,
-					nullptr,
-					IID_PPV_ARGS(&pUploadIndexBuffer)
-				) >> chk;
-			}
-			// copy
-			{
-				WORD* mappedIndexData = nullptr;
-				pUploadIndexBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndexData)) >> chk;
-				std::ranges::copy(indices, mappedIndexData);
-				pUploadIndexBuffer->Unmap(0, nullptr);
-			}
-			gfx.ResetCmd();
-			gfx.CommandList()->CopyResource(pIndexBuffer.Get(), pUploadIndexBuffer.Get());
-			gfx.Execute();
-			gfx.Sync();
+			pIndexBuffer = std::make_unique<IndexBuffer>(gfx, indices);
 		}
-		// index buffer view
-		indexBufferView = {
-			.BufferLocation = pIndexBuffer->GetGPUVirtualAddress(),
-			.SizeInBytes = nIndices * (UINT)sizeof(WORD),
-			.Format = DXGI_FORMAT_R16_UINT,
-		};
 		// cube texture
 		{
 			// load image data
@@ -283,7 +236,7 @@ public:
 		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		gfx.CommandList()->IASetVertexBuffers(0, 1, &pVertexBuffer->vertexBufferView);
-		gfx.CommandList()->IASetIndexBuffer(&indexBufferView);
+		gfx.CommandList()->IASetIndexBuffer(&pIndexBuffer->indexBufferView);
 		// bind the heap containing the texture descriptor 
 		gfx.CommandList()->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
 		// bind the descriptor table containing the texture descriptor 
@@ -293,7 +246,7 @@ public:
 		auto mvp = transform->GetTransforms(gfx);
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
 		gfx.ConfigForDraw();
-		gfx.CommandList()->DrawIndexedInstanced(indexCountPerInstance, 1, 0, 0, 0);
+		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
 
 
 		gfx.Execute();
@@ -335,16 +288,14 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pPipelineState;
 
-	// vertex buffer & vertex buffer view  // should be a member variable for use in IASetVertexBuffers 
+	// vertex buffer 
 	std::unique_ptr<VertexBuffer> pVertexBuffer;
 	// index buffer 
-	Microsoft::WRL::ComPtr<ID3D12Resource> pIndexBuffer;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView;
+	std::unique_ptr<IndexBuffer> pIndexBuffer;
 	// texture
 	Microsoft::WRL::ComPtr<ID3D12Resource> pCubeTexture;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle;
 
-	UINT indexCountPerInstance;
 
 };

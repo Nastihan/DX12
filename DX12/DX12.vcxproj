@@ -179,6 +179,7 @@
     <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="NastihanTimer.cpp" />
     <ClCompile Include="TransformCbuf.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="GraphicsError.h" />
+    <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="TransformCbuf.h" />
     <ClInclude Include="ImguiManager.h" />
     <ClInclude Include="imgui\imconfig.h" />
