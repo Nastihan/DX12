@@ -377,7 +377,7 @@ public:
 			rotationAngle += rotationSpeed * deltaTime;
 
 			// Calculate the new rotation matrix
-			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 7.0f);
 			DirectX::XMMATRIX rotationMatrix =
 				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
 				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))

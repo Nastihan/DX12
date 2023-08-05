@@ -294,6 +294,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="LightVectorData.hlsli" />
     <None Include="ShaderOps.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

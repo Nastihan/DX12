@@ -174,5 +174,8 @@
     <None Include="ShaderOps.hlsli">
       <Filter>Shaders\ShaderIncludes</Filter>
     </None>
+    <None Include="LightVectorData.hlsli">
+      <Filter>Shaders\ShaderIncludes</Filter>
+    </None>
   </ItemGroup>
 </Project>
