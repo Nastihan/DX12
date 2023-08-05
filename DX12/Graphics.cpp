@@ -210,7 +210,7 @@ void Graphics::BeginFrame()
 			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		pCommandList->ResourceBarrier(1, &barrier); 
 
-		const FLOAT clearColor[] = { 0.015, 0.0, 0.078,1.0f };
+		const FLOAT clearColor[] = { 0.015f, 0.0f, 0.078f,1.0f };
 		// clear rtv
 		pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}

@@ -26,6 +26,7 @@ void App::DoFrame()
 	{
 		ImGui::ShowDemoWindow(&showDemoWindow);
 	}
+	
 
 	// render loop body end
 	wnd.Gfx().EndFrame();
