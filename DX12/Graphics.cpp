@@ -8,8 +8,6 @@
 #include "imgui/imgui_impl_dx12.h"
 #include "imgui/imgui_impl_glfw.h"
 
-static float t = 0.f;
-constexpr float step = 0.01f;
 
 Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	:
@@ -212,15 +210,11 @@ void Graphics::BeginFrame()
 			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		pCommandList->ResourceBarrier(1, &barrier); 
 
-		const FLOAT clearColor[] = {
-							sin(2.f * t + 1.f) / 2.f + .5f,
-							sin(3.f * t + 2.f) / 2.f + .5f,
-							sin(5.f * t + 3.f) / 2.f + .5f,
-							1.0f
-		};
+		const FLOAT clearColor[] = { 0.015, 0.0, 0.078,1.0f };
 		// clear rtv
 		pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
+	// clear the depth stencil
 	pCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	Execute();
 	Sync();
@@ -256,10 +250,6 @@ void Graphics::EndFrame()
 	pFence->SetEventOnCompletion(fenceValue , fenceEvent) >> chk;
 	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
 		GetLastError() >> chk;
-	}
-
-	if ((t += step) >= 2.f * std::numbers::pi_v<float>) {
-		t = 0.f;
 	}
 }
 
