@@ -8,7 +8,7 @@ struct PS_Input
     float4 pos : SV_Position;
 };
 
-static float3 ambient = (0.04f, 0.04f, 0.04f);
+static float3 ambient = (0.02f, 0.02f, 0.02f);
 static float3 diffuseColor = (1.0f, 1.0f, 1.0f);
 static float diffuseIntensity = 1.0f;
 static float specularColor = (1.0f,1.0f,1.0f);

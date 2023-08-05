@@ -31,8 +31,11 @@
     <Filter Include="Shaders\Phong">
       <UniqueIdentifier>{c11dcfad-e496-4955-b096-c872c6156ef3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="BindableAbstract">
+    <Filter Include="Header Files\Bindable">
       <UniqueIdentifier>{dec025ca-00d3-4536-b1d0-f5a6d6a3874e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Bindable">
+      <UniqueIdentifier>{632adc8f-6a1a-4a28-9967-34d97473587b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -82,7 +85,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TransformCbuf.cpp">
-      <Filter>BindableAbstract</Filter>
+      <Filter>Source Files\Bindable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -147,7 +150,13 @@
       <Filter>Drawables</Filter>
     </ClInclude>
     <ClInclude Include="TransformCbuf.h">
-      <Filter>BindableAbstract</Filter>
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="BindableInclude.h">
+      <Filter>Header Files\Bindable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -187,6 +187,7 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="AssimpTest.h" />
+    <ClInclude Include="BindableInclude.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="d3dx12.h" />
@@ -205,6 +206,7 @@
     <ClInclude Include="NastihanMath.h" />
     <ClInclude Include="NastihanTimer.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
