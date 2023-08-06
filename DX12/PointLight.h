@@ -21,6 +21,7 @@ private:
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pLightCBuf;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;
 	PointLightCBuf cBufData = {};
 	mutable Sphere mesh;
 };

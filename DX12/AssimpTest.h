@@ -23,7 +23,6 @@ public:
 		Assimp::Importer imp;
 		const auto pModel = imp.ReadFile("Models\\suzanne.obj", 
 			aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
-		
 		const auto pMesh = pModel->mMeshes[0];
 
 		// Vertex data structure
@@ -64,9 +63,10 @@ public:
 		}
 
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
-		CD3DX12_ROOT_PARAMETER rootParameters[1]{};
+		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
 		rootParameters[0].InitAsConstants(3 * (sizeof(DirectX::XMMATRIX) / 4), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-
+		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
+		rootParameters[1].InitAsDescriptorTable(1, &descRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
 		// static sampler
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
@@ -130,6 +130,7 @@ public:
 		};
 		gfx.Device()->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&pPipelineState)) >> chk;
 	}
+
 	void Draw(Graphics& gfx) const override
 	{
 		gfx.ResetCmd();
