@@ -24,6 +24,7 @@ public:
 			DirectX::XMFLOAT3 pos;
 		};
 		auto model = SphereGeo::Make<Vertex>();
+		model.Transform(DirectX::XMMatrixScaling(0.2f, 0.2f, 0.2f));
 		// Vertex buffer stuff
 		{
 			pVertexBuffer = std::make_unique<VertexBuffer>(gfx, model.vertices);

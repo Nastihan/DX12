@@ -23,7 +23,6 @@ public:
 			DirectX::XMFLOAT3 pos;
 			DirectX::XMFLOAT2 tc;
 		};
-		UINT nVertices;
 		// Vertex buffer stuff
 		{
 			// vertex data
