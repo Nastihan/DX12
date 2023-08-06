@@ -8,6 +8,7 @@
 #include "ImguiManager.h"
 #include "AssimpTest.h"
 #include "Drawable.h"
+#include "Sphere.h"
 
 class App
 {
@@ -21,6 +22,7 @@ private:
 	ImguiManager imgui;
 	Window wnd;
 	NastihanTimer timer;
+	Sphere sphere;
 	Camera cam;
 	Cube cube;
 	AssimpTest test;

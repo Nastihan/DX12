@@ -34,8 +34,14 @@
     <Filter Include="Source Files\Bindable">
       <UniqueIdentifier>{632adc8f-6a1a-4a28-9967-34d97473587b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Drawables">
+    <Filter Include="Header Files\Drawable">
       <UniqueIdentifier>{1070afed-9587-4751-be9d-3e553c481d44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Geometry">
+      <UniqueIdentifier>{7bcbe9cf-20d8-4291-9dd1-76c6cc3d8546}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Solid">
+      <UniqueIdentifier>{1b274b58-7c4a-4428-befa-b6fd41e32867}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -88,7 +94,7 @@
       <Filter>Source Files\Bindable</Filter>
     </ClCompile>
     <ClCompile Include="IndexBuffer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Bindable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -108,10 +114,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Triangle.h">
-      <Filter>Header Files\Drawables</Filter>
+      <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="Cube.h">
-      <Filter>Header Files\Drawables</Filter>
+      <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
@@ -150,7 +156,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AssimpTest.h">
-      <Filter>Header Files\Drawables</Filter>
+      <Filter>Header Files\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="TransformCbuf.h">
       <Filter>Header Files\Bindable</Filter>
@@ -165,7 +171,16 @@
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
     <ClInclude Include="Drawable.h">
-      <Filter>Header Files\Drawables</Filter>
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereGeo.h">
+      <Filter>Header Files\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexedTraingleList.h">
+      <Filter>Header Files\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -186,6 +201,12 @@
     </FxCompile>
     <FxCompile Include="PhongPS.hlsl">
       <Filter>Shaders\Phong</Filter>
+    </FxCompile>
+    <FxCompile Include="SolidLightPS.hlsl">
+      <Filter>Shaders\Solid</Filter>
+    </FxCompile>
+    <FxCompile Include="SolidLightVS.hlsl">
+      <Filter>Shaders\Solid</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
