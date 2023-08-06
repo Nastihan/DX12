@@ -1,6 +1,6 @@
 #include "IndexBuffer.h"
 
-IndexBuffer::IndexBuffer(Graphics& gfx, std::vector<WORD>& indices)
+IndexBuffer::IndexBuffer(Graphics& gfx,const std::vector<WORD>& indices)
 {
 
 	nIndices = (UINT)std::size(indices);

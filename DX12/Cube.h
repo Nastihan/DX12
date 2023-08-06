@@ -9,8 +9,10 @@
 #include <chrono>
 #include <DxTex/include/DirectXTex.h>
 #include <ranges>
+#include "Drawable.h"
+#include "BindableInclude.h"
 
-class Cube
+class Cube : public Drawable
 {
 public:
 	Cube(Graphics& gfx)
@@ -25,108 +27,51 @@ public:
 		// Vertex buffer stuff
 		{
 			// vertex data
-			const Vertex vertices[] = {
-					// Front face
-					{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (0)
-					{ { 1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (1)
-					{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 0.0f } }, // Top-left (2)
-					{ { 1.0f, 1.0f, -1.0f }, { 1.0f, 0.0f } }, // Top-right (3)
+			const std::vector<Vertex> vertices = {
+				// Front face
+				{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (0)
+				{ { 1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (1)
+				{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 0.0f } }, // Top-left (2)
+				{ { 1.0f, 1.0f, -1.0f }, { 1.0f, 0.0f } }, // Top-right (3)
 
-					// Back face
-					{ { -1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f } },  // Bottom-left (4)
-					{ { 1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f } },  // Bottom-right (5)
-					{ { -1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },  // Top-left (6)
-					{ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },  // Top-right (7)
+				// Back face
+				{ { -1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f } },  // Bottom-left (4)
+				{ { 1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f } },  // Bottom-right (5)
+				{ { -1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },  // Top-left (6)
+				{ { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },  // Top-right (7)
 
-					// Left face
-					{ { -1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-left (8)
-					{ { -1.0f, 1.0f, -1.0f }, { 1.0f, 0.0f } }, // Top-left (9)
-					{ { -1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f } }, // Bottom-right (10)
-					{ { -1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-right (11)
+				// Left face
+				{ { -1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-left (8)
+				{ { -1.0f, 1.0f, -1.0f }, { 1.0f, 0.0f } }, // Top-left (9)
+				{ { -1.0f, -1.0f, 1.0f }, { 0.0f, 1.0f } }, // Bottom-right (10)
+				{ { -1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-right (11)
 
-					// Right face
-					{ { 1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (12)
-					{ { 1.0f, 1.0f, -1.0f }, { 0.0f, 0.0f } }, // Top-left (13)
-					{ { 1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f } }, // Bottom-right (14)
-					{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (15)
+				// Right face
+				{ { 1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (12)
+				{ { 1.0f, 1.0f, -1.0f }, { 0.0f, 0.0f } }, // Top-left (13)
+				{ { 1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f } }, // Bottom-right (14)
+				{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (15)
 
-					// Bottom face
-					{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (20)
-					{ { 1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (21)
-					{ { -1.0f, -1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-left (22)
-					{ { 1.0f, -1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (23)
+				// Bottom face
+				{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (20)
+				{ { 1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (21)
+				{ { -1.0f, -1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-left (22)
+				{ { 1.0f, -1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (23)
 
-					// Top face
-					{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (16)
-					{ { 1.0f, 1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (17)
-					{ { -1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-left (18)
-					{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (19)
+				// Top face
+				{ { -1.0f, 1.0f, -1.0f }, { 0.0f, 1.0f } }, // Bottom-left (16)
+				{ { 1.0f, 1.0f, -1.0f }, { 1.0f, 1.0f } }, // Bottom-right (17)
+				{ { -1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }, // Top-left (18)
+				{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } }, // Top-right (19)
 
-	
+
 			};
-
-			nVertices = (UINT)std::size(vertices);
-
-			// commited resource for the vertex buffer on the gpu side
-			{
-				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-				const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
-
-				gfx.Device()->CreateCommittedResource(&heapProps,
-					D3D12_HEAP_FLAG_NONE,
-					&desc,
-					// D3D12_RESOURCE_STATE_COPY_DEST d3d12 turns this param to COMMON for effectivity
-					D3D12_RESOURCE_STATE_COMMON,
-					nullptr,
-					IID_PPV_ARGS(&pVertexBuffer)
-				) >> chk;
-
-
-				// uncomment to not get the warning every frame
-				/*auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(pVertexBuffer.Get(),
-					D3D12_RESOURCE_STATE_COMMON,
-					D3D12_RESOURCE_STATE_COPY_DEST
-				);
-				pCommandList->ResourceBarrier(1, &barrier);*/
-			}
-
-			// resource for cpu upload of the vertex data
-			Microsoft::WRL::ComPtr<ID3D12Resource> pUploadVertexBuffer;
-			{
-				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-				const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
-
-				gfx.Device()->CreateCommittedResource(&heapProps,
-					D3D12_HEAP_FLAG_NONE,
-					&desc,
-					D3D12_RESOURCE_STATE_GENERIC_READ,
-					nullptr,
-					IID_PPV_ARGS(&pUploadVertexBuffer)
-				) >> chk;
-			}
-			// copy the vertex data to uploadBuffer
-			{
-				Vertex* mappedVertexData = nullptr;
-				pUploadVertexBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mappedVertexData)) >> chk;
-				std::ranges::copy(vertices, mappedVertexData);
-				pUploadVertexBuffer->Unmap(0, nullptr);
-			}
-			gfx.ResetCmd();
-			gfx.CommandList()->CopyResource(pVertexBuffer.Get(), pUploadVertexBuffer.Get());
-			gfx.Execute();
-			gfx.Sync();
+			pVertexBuffer = std::make_unique<VertexBuffer>(gfx, vertices);
 		}
-		// vertex buffer view
-		vertexBufferView = {
-			.BufferLocation = pVertexBuffer->GetGPUVirtualAddress(),
-			.SizeInBytes = nVertices * (UINT)sizeof(Vertex),
-			.StrideInBytes = sizeof(Vertex),
-		};
 		// Index buffer stuff
-		UINT nIndices;
 		{
 			// index data
-			const WORD indices[] = {
+			const std::vector<WORD> indices = {
 				0,2, 1,    2,3,1,
 				4,5, 7,    4,7,6,
 				8,10, 9,  10,11,9,
@@ -134,51 +79,9 @@ public:
 				16,17,18, 18,17,19,
 				20,23,21, 20,22,23
 			};
-			nIndices = (UINT)std::size(indices);
 
-			// create commited resource for index buffer
-			{
-				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices));
-				gfx.Device()->CreateCommittedResource(&heapProps,
-					D3D12_HEAP_FLAG_NONE,
-					&resourceDesc,
-					D3D12_RESOURCE_STATE_COMMON,
-					nullptr,
-					IID_PPV_ARGS(&pIndexBuffer)
-				) >> chk;
-			}
-			// create commited resource for cpu upload of the vertex data
-			Microsoft::WRL::ComPtr<ID3D12Resource> pUploadIndexBuffer;
-			{
-				const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices));
-				gfx.Device()->CreateCommittedResource(&heapProps,
-					D3D12_HEAP_FLAG_NONE,
-					&resourceDesc,
-					D3D12_RESOURCE_STATE_GENERIC_READ,
-					nullptr,
-					IID_PPV_ARGS(&pUploadIndexBuffer)
-				) >> chk;
-			}
-			// copy
-			{
-				WORD* mappedIndexData = nullptr;
-				pUploadIndexBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndexData)) >> chk;
-				std::ranges::copy(indices, mappedIndexData);
-				pUploadIndexBuffer->Unmap(0, nullptr);
-			}
-			gfx.ResetCmd();
-			gfx.CommandList()->CopyResource(pIndexBuffer.Get(), pUploadIndexBuffer.Get());
-			gfx.Execute();
-			gfx.Sync();
+			pIndexBuffer = std::make_unique<IndexBuffer>(gfx, indices);
 		}
-		// index buffer view
-		indexBufferView = {
-			.BufferLocation = pIndexBuffer->GetGPUVirtualAddress(),
-			.SizeInBytes = nIndices * (UINT)sizeof(WORD),
-			.Format = DXGI_FORMAT_R16_UINT,
-		};
 		// cube texture
 		{
 			// load image data
@@ -278,7 +181,7 @@ public:
 		
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
 		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
-		rootParameters[0].InitAsConstants(sizeof(DirectX::XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+		rootParameters[0].InitAsConstants(3 * (sizeof(DirectX::XMMATRIX) / 4), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
 		rootParameters[1].InitAsDescriptorTable(1, &descRange);
 		
@@ -345,28 +248,29 @@ public:
 		};
 		gfx.Device()->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&pPipelineState)) >> chk;
 	}
-	void Draw(Graphics& gfx)
+	void Draw(Graphics& gfx) const override
 	{
 		gfx.ResetCmd();
 		gfx.CommandList()->SetPipelineState(pPipelineState.Get());
 		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		gfx.CommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-		gfx.CommandList()->IASetIndexBuffer(&indexBufferView);
+		gfx.CommandList()->IASetVertexBuffers(0, 1, &pVertexBuffer->vertexBufferView);
+		gfx.CommandList()->IASetIndexBuffer(&pIndexBuffer->indexBufferView);
 		// bind the heap containing the texture descriptor 
 		gfx.CommandList()->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
 		// bind the descriptor table containing the texture descriptor 
 		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, srvHeap->GetGPUDescriptorHandleForHeapStart());
-		auto mvp = DirectX::XMMatrixTranspose(GetTransform(gfx));
+		auto transform = std::make_unique<TransformCbuf>(*this);
+		auto mvp = transform->GetTransforms(gfx);
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
 		gfx.ConfigForDraw();
-		gfx.CommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
+		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
 
 
 		gfx.Execute();
 		gfx.Sync();
 	}
-	DirectX::XMMATRIX GetTransform(Graphics& gfx)
+	DirectX::XMMATRIX GetTransform() const noexcept override
 	{
 		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
 		{
@@ -396,20 +300,16 @@ public:
 		};
 		const auto model = updateRotationMatrix();
 
-		const auto MVP = model * gfx.GetCamera() * gfx.GetProjection();
-
-		return MVP;
+		return model;
 	}
 private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pPipelineState;
 
-	// vertex buffer & vertex buffer view  // should be a member variable for use in IASetVertexBuffers 
-	Microsoft::WRL::ComPtr<ID3D12Resource> pVertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+	// vertex buffer 
+	std::unique_ptr<VertexBuffer> pVertexBuffer;
 	// index buffer 
-	Microsoft::WRL::ComPtr<ID3D12Resource> pIndexBuffer;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView;
+	std::unique_ptr<IndexBuffer> pIndexBuffer;
 	// texture
 	Microsoft::WRL::ComPtr<ID3D12Resource> pCubeTexture;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;

@@ -13,14 +13,16 @@ struct VS_Output
 
 struct MVP
 {
-    matrix transform;
+    matrix model;
+    matrix modelView;
+    matrix modelViewProj;
 };
 ConstantBuffer<MVP> mvp : register(b0);
 
 VS_Output main( VS_Input input )
 {
     VS_Output output;
-    output.Position = mul(float4(input.pos, 1.0f), mvp.transform);
+    output.Position = mul(float4(input.pos, 1.0f), mvp.modelViewProj);
     output.tc = input.tc;
     return output;
 }
