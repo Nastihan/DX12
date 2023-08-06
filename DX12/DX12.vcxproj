@@ -197,6 +197,7 @@
     <ClInclude Include="Drawable.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="IndexedTraingleList.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SphereGeo.h" />
     <ClInclude Include="TransformCbuf.h" />
