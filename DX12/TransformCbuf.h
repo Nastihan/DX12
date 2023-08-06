@@ -2,7 +2,7 @@
 #include <DirectXMath.h>
 #include "Graphics.h"
 
-class AssimpTest;
+class Drawable;
 
 class TransformCbuf
 {
@@ -14,8 +14,8 @@ private:
 		DirectX::XMMATRIX modelViewProj;
 	};
 public:
-	TransformCbuf(AssimpTest& parent);
+	TransformCbuf(const Drawable& parent);
 	Transforms GetTransforms(Graphics& gfx);
 private:
-	AssimpTest* pParent = nullptr;
+	const Drawable* pParent = nullptr;
 };

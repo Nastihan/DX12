@@ -19,9 +19,6 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{75a3d84e-a2fa-41a5-a35c-a83b9317fa5a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Drawables">
-      <UniqueIdentifier>{1070afed-9587-4751-be9d-3e553c481d44}</UniqueIdentifier>
-    </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{61aa0204-39a7-4ca5-8b41-596720b91ede}</UniqueIdentifier>
     </Filter>
@@ -36,6 +33,9 @@
     </Filter>
     <Filter Include="Source Files\Bindable">
       <UniqueIdentifier>{632adc8f-6a1a-4a28-9967-34d97473587b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Drawables">
+      <UniqueIdentifier>{1070afed-9587-4751-be9d-3e553c481d44}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -108,10 +108,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Triangle.h">
-      <Filter>Drawables</Filter>
+      <Filter>Header Files\Drawables</Filter>
     </ClInclude>
     <ClInclude Include="Cube.h">
-      <Filter>Drawables</Filter>
+      <Filter>Header Files\Drawables</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
@@ -150,7 +150,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AssimpTest.h">
-      <Filter>Drawables</Filter>
+      <Filter>Header Files\Drawables</Filter>
     </ClInclude>
     <ClInclude Include="TransformCbuf.h">
       <Filter>Header Files\Bindable</Filter>
@@ -163,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="IndexBuffer.h">
       <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable.h">
+      <Filter>Header Files\Drawables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

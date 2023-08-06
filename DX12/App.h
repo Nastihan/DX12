@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "ImguiManager.h"
 #include "AssimpTest.h"
+#include "Drawable.h"
 
 class App
 {
@@ -21,7 +22,7 @@ private:
 	Window wnd;
 	NastihanTimer timer;
 	Camera cam;
-	//Cube cube;
+	Cube cube;
 	AssimpTest test;
 	bool showDemoWindow = true;
 };

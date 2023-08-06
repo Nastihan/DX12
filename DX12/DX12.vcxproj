@@ -194,6 +194,7 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="GraphicsError.h" />
+    <ClInclude Include="Drawable.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="TransformCbuf.h" />
     <ClInclude Include="ImguiManager.h" />

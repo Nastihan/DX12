@@ -5,7 +5,7 @@
 
 App::App()
 	: wnd(2200, 1237.5, "DX12"),
-	//cube(wnd.Gfx()),
+	cube(wnd.Gfx()),
 	test(wnd.Gfx())
 {
 	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f/16.0f, 0.5f, 100.f));
@@ -19,7 +19,7 @@ void App::DoFrame()
 	wnd.Gfx().SetCamera(cam.GetMatrix());
 	// render loop body
 
-	//cube.Draw(wnd.Gfx());
+	cube.Draw(wnd.Gfx());
 	test.Draw(wnd.Gfx());
 
 	if (showDemoWindow)

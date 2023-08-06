@@ -1,16 +1,15 @@
 #include "TransformCbuf.h"
-#include "AssimpTest.h"
+#include "Drawable.h"
 
-TransformCbuf::TransformCbuf(AssimpTest& parent)
+TransformCbuf::TransformCbuf(const Drawable& parent)
 	: pParent(&parent)
 {
-
 }
 
 TransformCbuf::Transforms TransformCbuf::GetTransforms(Graphics& gfx)
 {
 	assert(pParent != nullptr);
-	const auto model = pParent->GetTransform(gfx);
+	const auto model = pParent->GetTransform();
 	const auto modelView = model * gfx.GetCamera();
 	return {
 		DirectX::XMMatrixTranspose(model),

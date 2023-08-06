@@ -12,9 +12,10 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "Drawable.h"
 #include "BindableInclude.h"
 
-class AssimpTest
+class AssimpTest : public Drawable
 {
 public:
 	AssimpTest(Graphics& gfx)
@@ -44,8 +45,6 @@ public:
 			}
 			pVertexBuffer = std::make_unique<VertexBuffer>(gfx, vertices);
 		}
-
-		
 		// Index buffer stuff
 		{
 			std::vector<WORD> indices;
@@ -229,7 +228,7 @@ public:
 		};
 		gfx.Device()->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&pPipelineState)) >> chk;
 	}
-	void Draw(Graphics& gfx)
+	void Draw(Graphics& gfx) const override
 	{
 		gfx.ResetCmd();
 		gfx.CommandList()->SetPipelineState(pPipelineState.Get());
@@ -252,7 +251,7 @@ public:
 		gfx.Execute();
 		gfx.Sync();
 	}
-	DirectX::XMMATRIX GetTransform(Graphics& gfx)
+	DirectX::XMMATRIX GetTransform() const noexcept override
 	{
 		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
 		{
@@ -272,7 +271,7 @@ public:
 			rotationAngle += rotationSpeed * deltaTime;
 
 			// Calculate the new rotation matrix
-			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 7.0f);
+			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(3.0f, 0.0f, 7.0f);
 			DirectX::XMMATRIX rotationMatrix =
 				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
 				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))
