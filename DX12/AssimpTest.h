@@ -62,111 +62,13 @@ public:
 
 			pIndexBuffer = std::make_unique<IndexBuffer>(gfx, indices);
 		}
-		// cube texture
-		{
-			// load image data
-			DirectX::ScratchImage image;
-			DirectX::LoadFromWICFile(L"Models\\wood.jpg", DirectX::WIC_FLAGS_NONE, nullptr, image) >> chk;
-			// generate mip chain
-			DirectX::ScratchImage mipChain;
-			DirectX::GenerateMipMaps(*image.GetImages(), DirectX::TEX_FILTER_BOX, 0, mipChain) >> chk;
-
-			// texture resource
-			{
-				const auto& chainBase = *mipChain.GetImages();
-				CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-				const auto resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-					chainBase.format,
-					(UINT)chainBase.width,
-					(UINT)chainBase.height
-				);
-				gfx.Device()->CreateCommittedResource(
-					&heapProps,
-					D3D12_HEAP_FLAG_NONE,
-					&resourceDesc,
-					D3D12_RESOURCE_STATE_COPY_DEST,
-					nullptr,
-					IID_PPV_ARGS(&pCubeTexture)) >> chk;
-			}
-
-			const auto temp = mipChain.GetImageCount();
-
-			// collect subresource data 
-			const auto subresourceData = std::ranges::views::iota(0, (int)mipChain.GetImageCount()) |
-				std::ranges::views::transform([&](int i) {
-				const auto img = mipChain.GetImage(i, 0, 0);
-				return D3D12_SUBRESOURCE_DATA{
-					.pData = img->pixels,
-					.RowPitch = (LONG_PTR)img->rowPitch,
-					.SlicePitch = (LONG_PTR)img->slicePitch,
-				};
-					}) |
-				std::ranges::to<std::vector>();
-
-					Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
-					{
-						const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-						const auto uploadBufferSize = GetRequiredIntermediateSize(pCubeTexture.Get(), 0, (UINT)subresourceData.size());
-						const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
-						gfx.Device()->CreateCommittedResource(
-							&heapProps,
-							D3D12_HEAP_FLAG_NONE,
-							&resourceDesc,
-							D3D12_RESOURCE_STATE_GENERIC_READ,
-							nullptr,
-							IID_PPV_ARGS(&pUploadBuffer)
-						) >> chk;
-					}
-					gfx.ResetCmd();
-					// write commands to copy data to upload texture (copying each subresource) 
-					UpdateSubresources(gfx.CommandList().Get(),
-						pCubeTexture.Get(), pUploadBuffer.Get(),
-						0, 0,
-						(UINT)subresourceData.size(),
-						subresourceData.data()
-					);
-					{
-						// write command to transition texture to texture state  
-						const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-							pCubeTexture.Get(),
-							D3D12_RESOURCE_STATE_COPY_DEST,
-							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-						);
-						gfx.CommandList()->ResourceBarrier(1, &barrier);
-					}
-					gfx.Execute();
-					gfx.Sync();
-		}
-		// descriptor heap for the shader resource view
-		{
-			const D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{
-				.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-				.NumDescriptors = 1,
-				.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-			};
-			gfx.Device()->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap)) >> chk;
-		}
-		// create handle to the srv heap and to the only view in the heap 
-		srvHandle = (srvHeap->GetCPUDescriptorHandleForHeapStart());
-		// create the descriptor in the heap 
-		{
-			const D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{
-				.Format = pCubeTexture->GetDesc().Format,
-				.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
-				.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-				.Texture2D{.MipLevels = pCubeTexture->GetDesc().MipLevels },
-			};
-			gfx.Device()->CreateShaderResourceView(pCubeTexture.Get(), &srvDesc, srvHandle);
-		}
 
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
-		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
+		CD3DX12_ROOT_PARAMETER rootParameters[1]{};
 		rootParameters[0].InitAsConstants(3 * (sizeof(DirectX::XMMATRIX) / 4), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
-		rootParameters[1].InitAsDescriptorTable(1, &descRange);
+
 
 		// static sampler
-		const CD3DX12_STATIC_SAMPLER_DESC sampler{ 0 };
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
 		// Allow input layout and vertex shader and deny unnecessary access to certain pipeline stages.
 		const D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
@@ -177,7 +79,7 @@ public:
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 		rootSignatureDesc.Init((UINT)std::size(rootParameters), rootParameters,
-			1, &sampler, rootSignatureFlags);
+			0, nullptr, rootSignatureFlags);
 		// serialize root signature
 		Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob;
 		Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
@@ -236,10 +138,7 @@ public:
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		gfx.CommandList()->IASetVertexBuffers(0, 1, &pVertexBuffer->vertexBufferView);
 		gfx.CommandList()->IASetIndexBuffer(&pIndexBuffer->indexBufferView);
-		// bind the heap containing the texture descriptor 
-		gfx.CommandList()->SetDescriptorHeaps(1, srvHeap.GetAddressOf());
-		// bind the descriptor table containing the texture descriptor 
-		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, srvHeap->GetGPUDescriptorHandleForHeapStart());
+
 		// transforms
 		std::unique_ptr<TransformCbuf> transform = std::make_unique<TransformCbuf>(*this);
 		auto mvp = transform->GetTransforms(gfx);
@@ -291,10 +190,6 @@ private:
 	std::unique_ptr<VertexBuffer> pVertexBuffer;
 	// index buffer 
 	std::unique_ptr<IndexBuffer> pIndexBuffer;
-	// texture
-	Microsoft::WRL::ComPtr<ID3D12Resource> pCubeTexture;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;
-	CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle;
 
 
 };

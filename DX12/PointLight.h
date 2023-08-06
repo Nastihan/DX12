@@ -20,6 +20,7 @@ private:
 		float attQuad = 0.0075f;
 	};
 private:
+	Microsoft::WRL::ComPtr<ID3D12Resource> pLightCBuf;
 	PointLightCBuf cBufData = {};
 	mutable Sphere mesh;
 };
