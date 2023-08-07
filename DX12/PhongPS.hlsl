@@ -13,8 +13,6 @@ struct PS_Input
 static float specularColor = (1.0f,1.0f,1.0f);
 
 
-static float3 lightpos = (6.0f, 1.0f, 3.0f);
-
 
 float4 main(PS_Input input) : SV_TARGET
 {
@@ -25,7 +23,7 @@ float4 main(PS_Input input) : SV_TARGET
     input.viewNormal = normalize(input.viewNormal);
     
     // fragment to light vector data
-    const LightVectorData lv = CalculateLightVectorData(lightpos, input.viewFragPos);
+    const LightVectorData lv = CalculateLightVectorData(viewLightPos, input.viewFragPos);
 	    // attenuation
     const float att = Attenuate(attConst, attLin, attQuad, lv.distToL);
 	    // diffuse

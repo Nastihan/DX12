@@ -9,7 +9,9 @@ public:
 	PointLight() = default;
 	PointLight(Graphics& gfx);
 	void Draw(Graphics& gfx);
+	void Update(Graphics& gfx, DirectX::FXMMATRIX view);
 	void Reset();
+	void SpawnControlWindow();
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetHeap();
 
 private:
@@ -26,6 +28,7 @@ private:
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pLightCBuf;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> pHeap;
 	PointLightCBuf cBufData = {};
 	mutable Sphere mesh;

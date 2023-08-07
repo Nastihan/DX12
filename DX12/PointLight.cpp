@@ -1,6 +1,6 @@
 #include "PointLight.h"
 #include <ranges>
-
+#include "imgui/imgui.h"
 
 PointLight::PointLight(Graphics& gfx)
 	: mesh(gfx)
@@ -20,7 +20,6 @@ PointLight::PointLight(Graphics& gfx)
 		IID_PPV_ARGS(&pLightCBuf)
 	) >> chk;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
 	{
 		const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
 		const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(cBufData));
@@ -67,7 +66,31 @@ PointLight::PointLight(Graphics& gfx)
 
 void PointLight::Draw(Graphics& gfx)
 {
+	mesh.SetPos(cBufData.pos);
 	mesh.Draw(gfx);
+
+}
+
+void PointLight::Update(Graphics& gfx,DirectX::FXMMATRIX view)
+{
+	// Map the upload buffer and keep it mapped during the lifetime of the application
+	void* pLightData = nullptr;
+	pUploadBuffer->Map(0, nullptr, &pLightData) >> chk;
+
+	auto dataCopy = cBufData;
+	const auto pos = DirectX::XMLoadFloat3(&cBufData.pos);
+	DirectX::XMStoreFloat3(&dataCopy.pos, DirectX::XMVector3Transform(pos, view));
+
+	// Update the constant buffer data with the latest values
+	memcpy(pLightData, &dataCopy, sizeof(PointLightCBuf));
+
+	pUploadBuffer->Unmap(0, nullptr);
+
+	// Copy the data from the upload buffer to the default heap (pLightCBuf)
+	gfx.ResetCmd();
+	gfx.CommandList()->CopyResource(pLightCBuf.Get(), pUploadBuffer.Get());
+	gfx.Execute();
+	gfx.Sync();
 }
 
 void PointLight::Reset()
@@ -79,6 +102,19 @@ void PointLight::Reset()
 	cBufData.attConst = 1.0f;
 	cBufData.attLin = 0.045f;
 	cBufData.attQuad = 0.0075f;
+}
+
+void PointLight::SpawnControlWindow()
+{
+	if (ImGui::Begin("Light"))
+	{
+		ImGui::Text("Position");
+		ImGui::SliderFloat("X", &cBufData.pos.x, -70.0f, 70.0f);
+		ImGui::SliderFloat("Y", &cBufData.pos.y, -70.0f, 70.0f);
+		ImGui::SliderFloat("Z", &cBufData.pos.z, -70.0f, 70.0f);
+
+	}
+	ImGui::End();
 }
 
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> PointLight::GetHeap()

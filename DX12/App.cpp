@@ -19,17 +19,20 @@ void App::DoFrame()
 {
 	wnd.Gfx().BeginFrame();
 	wnd.Gfx().SetCamera(cam.GetMatrix());
+	light.Update(wnd.Gfx(), cam.GetMatrix());
 	// render loop body
 
+
+	// Draw Calls
 	//cube.Draw(wnd.Gfx());
 	test.Draw(wnd.Gfx());
 	light.Draw(wnd.Gfx());
 
-	if (showDemoWindow)
-	{
-		ImGui::ShowDemoWindow(&showDemoWindow);
-	}
 	
+
+
+	// Imgui Calls
+	light.SpawnControlWindow();
 
 	// render loop body end
 	wnd.Gfx().EndFrame();

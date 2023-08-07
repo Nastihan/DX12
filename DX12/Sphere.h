@@ -118,35 +118,11 @@ public:
 	}
 	DirectX::XMMATRIX GetTransform() const noexcept override
 	{
-		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
-		{
-			// Assuming rotationSpeed is the speed at which you want the triangle to rotate (in degrees per second)
-			static float rotationSpeed = 23.0f; // Adjust this value to control rotation speed
-			static float rotationAngle = 0.0f;
-			static std::chrono::steady_clock::time_point prevTime = std::chrono::steady_clock::now();
-
-			// Get the current time
-			auto currentTime = std::chrono::steady_clock::now();
-
-			// Calculate the time elapsed since the last frame
-			float deltaTime = std::chrono::duration<float>(currentTime - prevTime).count();
-			prevTime = currentTime;
-
-			// Update the rotation angle
-			rotationAngle += rotationSpeed * deltaTime;
-
-			// Calculate the new rotation matrix
-			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-			DirectX::XMMATRIX rotationMatrix =
-				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
-				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))
-				* DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rotationAngle));
-
-			return  rotationMatrix * translation;
-		};
-		const auto model = updateRotationMatrix();
-
-		return model;
+		return DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+	}
+	void SetPos(DirectX::XMFLOAT3 pos)
+	{
+		this->pos = pos;
 	}
 private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
@@ -155,6 +131,9 @@ private:
 	std::unique_ptr<VertexBuffer> pVertexBuffer;
 	// index buffer 
 	std::unique_ptr<IndexBuffer> pIndexBuffer;
+	// position
+	DirectX::XMFLOAT3 pos;
+
 	
 
 };
