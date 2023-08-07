@@ -1,36 +1,73 @@
 #include "PointLight.h"
+#include <ranges>
 
 PointLight::PointLight(Graphics& gfx)
 	: mesh(gfx)
 {
+	// constant buffer
+	const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+	const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(cBufData));
+
+	gfx.Device()->CreateCommittedResource(
+		&heapProps,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&pLightCBuf)
+	) >> chk;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
+	{
+		const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
+		const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(cBufData));
+		gfx.Device()->CreateCommittedResource(
+			&heapProps,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDesc,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&pUploadBuffer)
+		) >> chk;
+	}
+
+	void* pLightData = nullptr;
+	pUploadBuffer->Map(0, nullptr, &pLightData) >> chk;
+	memcpy(pLightData, &cBufData,sizeof(PointLightCBuf));
+	pUploadBuffer->Unmap(0,nullptr);
+
+	gfx.ResetCmd();
+	gfx.CommandList()->CopyResource(pLightCBuf.Get(), pUploadBuffer.Get());
+	gfx.Execute();
+	gfx.Sync();
+
+
 	// descriptor heap for the shader resource view
 	{
-		const D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{
+		const D3D12_DESCRIPTOR_HEAP_DESC heapDesc{
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 			.NumDescriptors = 1,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 		};
-		gfx.Device()->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap)) >> chk;
+		gfx.Device()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&pHeap)) >> chk;
 	}
 	// create handle to the srv heap and to the only view in the heap 
-	D3D12_CPU_DESCRIPTOR_HANDLE srvHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = pHeap->GetCPUDescriptorHandleForHeapStart();
 	// create the descriptor in the heap 
 	{
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Buffer.FirstElement = 0;
-		srvDesc.Buffer.NumElements = sizeof(cBufData) / sizeof(UINT);
-		srvDesc.Buffer.StructureByteStride = sizeof(cBufData);
-		srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-		gfx.Device()->CreateShaderResourceView(pLightCBuf.Get(), &srvDesc, srvHandle);
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+		cbvDesc.BufferLocation = pUploadBuffer->GetGPUVirtualAddress();
+		cbvDesc.SizeInBytes = sizeof(PointLightCBuf); 
+		gfx.Device()->CreateConstantBufferView(&cbvDesc,cbvHandle);
 	}
-
-
 }
 
 void PointLight::Draw(Graphics& gfx)
 {
 	mesh.Draw(gfx);
+}
+
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> PointLight::GetHeap()
+{
+	return pHeap;
 }

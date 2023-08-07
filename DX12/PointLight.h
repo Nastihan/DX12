@@ -7,6 +7,7 @@ class PointLight
 public:
 	PointLight(Graphics& gfx);
 	void Draw(Graphics& gfx);
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetHeap();
 
 private:
 	struct PointLightCBuf
@@ -21,7 +22,7 @@ private:
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pLightCBuf;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> pHeap;
 	PointLightCBuf cBufData = {};
 	mutable Sphere mesh;
 };
