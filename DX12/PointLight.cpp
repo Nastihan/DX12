@@ -60,7 +60,7 @@ PointLight::PointLight(Graphics& gfx)
 	{
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 		cbvDesc.BufferLocation = pLightCBuf->GetGPUVirtualAddress();
-		cbvDesc.SizeInBytes = sizeof(PointLightCBuf); 
+		cbvDesc.SizeInBytes = (UINT)sizeof(cBufData); 
 		gfx.Device()->CreateConstantBufferView(&cbvDesc,cbvHandle);
 	}
 }
