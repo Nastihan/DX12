@@ -23,7 +23,6 @@ private:
 	ImguiManager imgui;
 	Window wnd;
 	NastihanTimer timer;
-	Sphere sphere;
 	PointLight light;
 	Camera cam;
 	//Cube cube;

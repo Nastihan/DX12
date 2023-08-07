@@ -7,8 +7,7 @@ App::App()
 	: wnd(2200, 1237.5, "DX12 Engine"),
 	light(wnd.Gfx()),
 	//cube(wnd.Gfx()),
-	test(wnd.Gfx()),
-	sphere(wnd.Gfx())
+	test(wnd.Gfx())
 {
 	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f/16.0f, 0.5f, 100.f));
 	wnd.Gfx().SetCamera(cam.GetMatrix());
@@ -24,7 +23,7 @@ void App::DoFrame()
 
 	//cube.Draw(wnd.Gfx());
 	test.Draw(wnd.Gfx());
-	sphere.Draw(wnd.Gfx());
+	light.Draw(wnd.Gfx());
 
 	if (showDemoWindow)
 	{
