@@ -9,6 +9,7 @@
 #include "AssimpTest.h"
 #include "Drawable.h"
 #include "Sphere.h"
+#include "PointLight.h"
 
 class App
 {
@@ -23,8 +24,9 @@ private:
 	Window wnd;
 	NastihanTimer timer;
 	Sphere sphere;
+	PointLight light;
 	Camera cam;
-	Cube cube;
+	//Cube cube;
 	AssimpTest test;
 	bool showDemoWindow = true;
 };

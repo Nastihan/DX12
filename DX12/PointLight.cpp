@@ -1,9 +1,12 @@
 #include "PointLight.h"
 #include <ranges>
 
+
 PointLight::PointLight(Graphics& gfx)
 	: mesh(gfx)
 {
+	Reset();
+
 	// constant buffer
 	const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
 	const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(cBufData));
@@ -56,7 +59,7 @@ PointLight::PointLight(Graphics& gfx)
 	// create the descriptor in the heap 
 	{
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-		cbvDesc.BufferLocation = pUploadBuffer->GetGPUVirtualAddress();
+		cbvDesc.BufferLocation = pLightCBuf->GetGPUVirtualAddress();
 		cbvDesc.SizeInBytes = sizeof(PointLightCBuf); 
 		gfx.Device()->CreateConstantBufferView(&cbvDesc,cbvHandle);
 	}
@@ -65,6 +68,17 @@ PointLight::PointLight(Graphics& gfx)
 void PointLight::Draw(Graphics& gfx)
 {
 	mesh.Draw(gfx);
+}
+
+void PointLight::Reset()
+{
+	cBufData.pos = { 0.0f,0.0f,0.0f };
+	cBufData.ambient = { 0.02f,0.02f,0.02f };
+	cBufData.diffuseColor = { 1.0f,1.0f,1.0f };
+	cBufData.diffuseIntensity = 1.0f;
+	cBufData.attConst = 1.0f;
+	cBufData.attLin = 0.045f;
+	cBufData.attQuad = 0.0075f;
 }
 
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> PointLight::GetHeap()

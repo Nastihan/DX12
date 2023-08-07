@@ -14,6 +14,7 @@
 #include <assimp/postprocess.h>
 #include "Drawable.h"
 #include "BindableInclude.h"
+#include "PointLight.h"
 
 class AssimpTest : public Drawable
 {
@@ -65,7 +66,8 @@ public:
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
 		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
 		rootParameters[0].InitAsConstants(3 * (sizeof(DirectX::XMMATRIX) / 4), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV,1,0 };
+		// light desc table
+		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,0 };
 		rootParameters[1].InitAsDescriptorTable(1, &descRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
 		// static sampler
@@ -139,11 +141,11 @@ public:
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		gfx.CommandList()->IASetVertexBuffers(0, 1, &pVertexBuffer->vertexBufferView);
 		gfx.CommandList()->IASetIndexBuffer(&pIndexBuffer->indexBufferView);
-
 		// transforms
 		std::unique_ptr<TransformCbuf> transform = std::make_unique<TransformCbuf>(*this);
 		auto mvp = transform->GetTransforms(gfx);
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
+		BindLight(gfx);
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
 
@@ -151,6 +153,14 @@ public:
 		gfx.Execute();
 		gfx.Sync();
 	}
+
+	void BindLight(Graphics& gfx) const
+	{
+		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetLight().GetHeap().Get()};
+		gfx.CommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetLight().GetHeap()->GetGPUDescriptorHandleForHeapStart());
+	}
+
 	DirectX::XMMATRIX GetTransform() const noexcept override
 	{
 		auto updateRotationMatrix = []() -> DirectX::XMMATRIX

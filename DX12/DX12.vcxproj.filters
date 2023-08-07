@@ -222,5 +222,8 @@
     <None Include="LightVectorData.hlsli">
       <Filter>Shaders\ShaderIncludes</Filter>
     </None>
+    <None Include="PointLight.hlsli">
+      <Filter>Shaders\ShaderIncludes</Filter>
+    </None>
   </ItemGroup>
 </Project>

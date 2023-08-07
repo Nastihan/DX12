@@ -6,7 +6,9 @@
 #include "GraphicsError.h"
 #include "d3dx12.h"
 #include <DirectXMath.h>
+//#include "PointLight.h"
 
+class PointLight;
 
 class Graphics
 {
@@ -90,6 +92,8 @@ public:
 	DirectX::XMMATRIX GetCamera() const noexcept;
 	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 	DirectX::XMMATRIX GetProjection() const noexcept;
+	void SetLight(PointLight& light) noexcept;
+	PointLight& GetLight() const noexcept;
 	void EnableImgui() noexcept;
 	void DisableImgui() noexcept;
 	bool IsImguiEnabled() const noexcept;
@@ -97,6 +101,8 @@ private:
 	bool imguiEnabled = true;
 	DirectX::XMMATRIX camera;
 	DirectX::XMMATRIX projection;
+	PointLight* light;
+
 private:
 	// DX objects
 	Microsoft::WRL::ComPtr<ID3D12Device5> pDevice;

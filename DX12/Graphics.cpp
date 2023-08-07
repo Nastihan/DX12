@@ -179,6 +179,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 Graphics::~Graphics()
 {
 	ImGui_ImplDX12_Shutdown();
+	//delete light;
 }
 
 void Graphics::BeginFrame()
@@ -280,6 +281,16 @@ void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
 DirectX::XMMATRIX Graphics::GetProjection() const noexcept
 {
 	return projection;
+}
+
+void Graphics::SetLight(PointLight& light) noexcept
+{
+	this->light = &light;
+}
+
+PointLight& Graphics::GetLight() const noexcept
+{
+	return *light;
 }
 
 void Graphics::EnableImgui() noexcept

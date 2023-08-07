@@ -1,5 +1,6 @@
 #include "ShaderOps.hlsli"
 #include "LightVectorData.hlsli"
+#include "PointLight.hlsli"
 
 struct PS_Input
 {
@@ -8,14 +9,9 @@ struct PS_Input
     float4 pos : SV_Position;
 };
 
-static float3 ambient = (0.02f, 0.02f, 0.02f);
-static float3 diffuseColor = (1.0f, 1.0f, 1.0f);
-static float diffuseIntensity = 1.0f;
+
 static float specularColor = (1.0f,1.0f,1.0f);
-static float specularIntensity = 0.8f;
-static float attConst = 1.0f;
-static float attLin = 0.045;
-static float attQuad = 0.0075;
+
 
 static float3 lightpos = (6.0f, 1.0f, 3.0f);
 
