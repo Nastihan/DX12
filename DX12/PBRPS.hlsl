@@ -9,12 +9,11 @@ struct PS_Input
     float3 viewNormal : NORMAL;
     float4 pos : SV_Position;
 };
-static float specularColor = (1.0f, 1.0f, 1.0f);
 
-static float3 albedoMesh = (1.0f, 1.0f, 1.0f);
-static float3 emissivtyMesh = (0.1f, 0.1f, 0.1f);
-static float roughness = 0.2f;
-static float3 baseReflectane = (0.3f, 0.3f,0.3f);
+static const float3 albedoMesh = float3(1.0f, 0.0f, 0.0f);
+static const float3 emissivtyMesh = float3(0.0f, 0.0f, 0.0f);
+static const float roughness = 0.3f;
+static const float3 baseReflectane = float3(0.4f, 0.4f, 0.4f);
 
 
 
@@ -22,15 +21,16 @@ float4 main(PS_Input input) : SV_TARGET
 {
 
     //
+    LightVectorData lvData = CalculateLightVectorData(viewLightPos, input.viewFragPos);
     const float3 N = normalize(input.viewNormal);
-    const float3 V = normalize((0.0f, 0.0f, 0.0f) - input.viewFragPos);
-    const float3 L = normalize(viewLightPos - input.viewFragPos);
+    const float3 V = normalize(float3(0.0f, 0.0f, 0.0f) - input.viewFragPos);
+    const float3 L = lvData.dirToL;
     const float3 H = normalize(V + L);
 
     float3 Ks = F(baseReflectane, V, H);
-    float3 Kd = float3(1.0f,1.0f,1.0f) - Ks;
+    float3 Kd = 1.0f - Ks;
     
-    float3 Lambert = albedoMesh / 3.14159265f;
+    float3 Lambert = albedoMesh / 3.141592f;
     
     float3 cookTorranceNumerator = D(roughness, N, H) * G(roughness, N, V, L) * F(baseReflectane, V, H);
     float3 cookTorranceDenominator = 4.0f * max(dot(V, N), 0.0f) * max(dot(L, N), 0.0f);
@@ -38,8 +38,11 @@ float4 main(PS_Input input) : SV_TARGET
     float3 cookTorrance = cookTorranceNumerator / cookTorranceDenominator;
     
     float3 BRDF = Kd * Lambert + cookTorrance;
-    float3 outgoingLight = emissivtyMesh + BRDF * diffuseColor * max(dot(L, N), 0.0f);
     
-    return float4(outgoingLight, 1.0f);
+    float3 att = Attenuate(attConst, attLin, attQuad, lvData.distToL);
+    float3 lightIntensity =  att * diffuseColor * diffuseIntensity;
+    float3 outgoingLight = emissivtyMesh + BRDF * lightIntensity  * max(dot(L, N), 0.0f);
+    
+    return float4(outgoingLight.x,outgoingLight.y,outgoingLight.z, 1.0f);
  
 }

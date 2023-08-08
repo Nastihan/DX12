@@ -5,7 +5,7 @@ float D(float alpha, float3 N, float3 H)
     float numerator = pow(alpha, 2.0f);
     
     float NdotH = max(dot (N, H), 0.0f);
-    float denominator = 3.14159265f * pow(pow(NdotH, 2.0f) * (pow(alpha, 2.0f) - 1.0f) + 1.0f, 2.0f);
+    float denominator = 3.141592f * pow(pow(NdotH, 2.0f) * (pow(alpha, 2.0f) - 1.0f) + 1.0f, 2.0f);
     denominator = max(denominator, 0.000001f);
     
     return numerator / denominator;
