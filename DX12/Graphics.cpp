@@ -11,8 +11,9 @@
 
 Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	:
-	width(width),height(height)
+	width(width), height(height)
 {
+
 	constexpr UINT bufferCount = 2;
 	scissorRect = CD3DX12_RECT{ 0, 0, LONG_MAX, LONG_MAX };
 	viewport = CD3DX12_VIEWPORT{ 0.0f, 0.0f, float(width), float(height) };
@@ -179,6 +180,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 Graphics::~Graphics()
 {
 	ImGui_ImplDX12_Shutdown();
+	// !!!!!! should fix the annoying bug
 	//delete light;
 }
 
@@ -285,12 +287,12 @@ DirectX::XMMATRIX Graphics::GetProjection() const noexcept
 
 void Graphics::SetLight(PointLight& light) noexcept
 {
-	this->light = &light;
+	this->light = light;
 }
 
 PointLight& Graphics::GetLight() const noexcept
 {
-	return *light;
+	return light;
 }
 
 void Graphics::EnableImgui() noexcept

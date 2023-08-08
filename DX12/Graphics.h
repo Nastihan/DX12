@@ -6,7 +6,7 @@
 #include "GraphicsError.h"
 #include "d3dx12.h"
 #include <DirectXMath.h>
-//#include "PointLight.h"
+#include <optional>
 
 class PointLight;
 
@@ -101,7 +101,7 @@ private:
 	bool imguiEnabled = true;
 	DirectX::XMMATRIX camera;
 	DirectX::XMMATRIX projection;
-	PointLight* light;
+	std::optional<PointLight&> light;
 
 private:
 	// DX objects
