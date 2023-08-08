@@ -43,6 +43,9 @@
     <Filter Include="Shaders\Solid">
       <UniqueIdentifier>{1b274b58-7c4a-4428-befa-b6fd41e32867}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\PBR">
+      <UniqueIdentifier>{f4d51887-e5b2-42ea-9458-2bd00402e4f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -213,6 +216,12 @@
     </FxCompile>
     <FxCompile Include="SolidLightVS.hlsl">
       <Filter>Shaders\Solid</Filter>
+    </FxCompile>
+    <FxCompile Include="PBRVS.hlsl">
+      <Filter>Shaders\PBR</Filter>
+    </FxCompile>
+    <FxCompile Include="PBRPS.hlsl">
+      <Filter>Shaders\PBR</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
