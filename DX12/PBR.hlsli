@@ -28,5 +28,5 @@ float G(float alpha, float3 N, float3 V, float3 L)
 // Fresnel-Schlick Function
 float3 F(float3 F0, float3 V, float3 H)
 {
-    return F0 + (float3(1.0f) - F0) * pow(1 - max(dot(V, H), 0.0f), 5.0f);
+    return F0 + (float3(1.0f,1.0f,1.0f) - F0) * pow(1 - max(dot(V, H), 0.0f), 5.0f);
 }

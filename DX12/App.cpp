@@ -28,7 +28,8 @@ void App::DoFrame()
 
 	// Draw Calls
 	//cube.Draw(wnd.Gfx());
-	test.Draw(wnd.Gfx());
+	//test.Draw(wnd.Gfx());
+	spherePBR.Draw(wnd.Gfx());
 	light.Draw(wnd.Gfx());
 
 	// execute

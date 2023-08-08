@@ -26,7 +26,7 @@ public:
 		};
 		auto model = SphereGeo::Make<Vertex>();
 		model.SetNormalsIndependentFlat();
-		model.Transform(DirectX::XMMatrixScaling(0.2f, 0.2f, 0.2f));
+		//model.Transform(DirectX::XMMatrixScaling(0.2f, 0.2f, 0.2f));
 		// Vertex buffer stuff
 		{
 			pVertexBuffer = std::make_unique<VertexBuffer>(gfx, model.vertices);
@@ -148,7 +148,7 @@ public:
 			rotationAngle += rotationSpeed * deltaTime;
 
 			// Calculate the new rotation matrix
-			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(3.0f, 0.0f, 7.0f);
+			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(3.0f, 0.0f, 2.0f);
 			DirectX::XMMATRIX rotationMatrix =
 				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
 				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))
