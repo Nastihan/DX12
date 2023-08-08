@@ -287,12 +287,12 @@ DirectX::XMMATRIX Graphics::GetProjection() const noexcept
 
 void Graphics::SetLight(PointLight& light) noexcept
 {
-	this->light = light;
+	this->light = &light;
 }
 
 PointLight& Graphics::GetLight() const noexcept
 {
-	return light;
+	return *light;
 }
 
 void Graphics::EnableImgui() noexcept

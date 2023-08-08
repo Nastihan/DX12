@@ -101,7 +101,7 @@ private:
 	bool imguiEnabled = true;
 	DirectX::XMMATRIX camera;
 	DirectX::XMMATRIX projection;
-	std::optional<PointLight&> light;
+	PointLight* light;
 
 private:
 	// DX objects
