@@ -10,7 +10,7 @@
 #include "Drawable.h"
 #include "Sphere.h"
 #include "PointLight.h"
-
+#include "SpherePBR.h"
 class App
 {
 public:
@@ -25,6 +25,7 @@ private:
 	NastihanTimer timer;
 	PointLight light;
 	Camera cam;
+	SpherePBR spherePBR;
 	//Cube cube;
 	AssimpTest test;
 	bool showDemoWindow = true;

@@ -201,6 +201,7 @@
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SphereGeo.h" />
+    <ClInclude Include="SpherePBR.h" />
     <ClInclude Include="TransformCbuf.h" />
     <ClInclude Include="ImguiManager.h" />
     <ClInclude Include="imgui\imconfig.h" />
