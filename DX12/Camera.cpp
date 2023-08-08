@@ -1,9 +1,11 @@
 #include "Camera.h"
 #include "NastihanMath.h"
 #include <algorithm>
+#include "imgui/imgui.h"
 
 Camera::Camera()
 {
+	Reset();
 
 	const auto eyePosition = DirectX::XMVectorSet(0, 0, -5, 1);
 	DirectX::XMStoreFloat3(&pos, eyePosition);
@@ -44,4 +46,30 @@ void Camera::Rotate(float dx, float dy)
 {
 	yaw = wrap_angle(yaw + dx * rotationSpeed);
 	pitch = std::clamp(pitch + dy * rotationSpeed,  -PI / 2.0f, PI / 2.0f);
+}
+
+void Camera::SpawnControlWindow() noexcept
+{
+	if (ImGui::Begin("Camera"))
+	{
+		ImGui::Text("Position");
+		ImGui::SliderFloat("x", &pos.x, -100.0f, 100.0f, "%.1f");
+		ImGui::SliderFloat("y", &pos.y, -100.0f, 100.0f);
+		ImGui::SliderFloat("z", &pos.z, -100.0f, 100.0f);
+		ImGui::Text("Orientation");
+		ImGui::SliderAngle("Pitch", &pitch, -89.0f, 89.0f);
+		ImGui::SliderAngle("Yaw", &yaw, -180.0f, 180.0f);
+		if (ImGui::Button("Reset"))
+		{
+			Reset();
+		}
+	}
+	ImGui::End();
+}
+
+void Camera::Reset() noexcept
+{
+	pos = { 0.0f, 7.0f, -25.0f };
+	pitch = 0.0f;
+	yaw = 0.0f;
 }

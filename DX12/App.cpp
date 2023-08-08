@@ -40,6 +40,7 @@ void App::DoFrame()
 
 	// Imgui Calls
 	light.SpawnControlWindow();
+	cam.SpawnControlWindow();
 
 	// render loop body end
 	wnd.Gfx().EndFrame();
