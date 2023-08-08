@@ -225,5 +225,8 @@
     <None Include="PointLight.hlsli">
       <Filter>Shaders\ShaderIncludes</Filter>
     </None>
+    <None Include="PBR.hlsli">
+      <Filter>Shaders\ShaderIncludes</Filter>
+    </None>
   </ItemGroup>
 </Project>

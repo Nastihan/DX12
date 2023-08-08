@@ -333,6 +333,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="LightVectorData.hlsli" />
+    <None Include="PBR.hlsli" />
     <None Include="PointLight.hlsli" />
     <None Include="ShaderOps.hlsli" />
   </ItemGroup>
