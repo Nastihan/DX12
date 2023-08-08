@@ -11,10 +11,10 @@ struct PS_Input
 };
 static float specularColor = (1.0f, 1.0f, 1.0f);
 
-static float3 albedoMesh = (0.5f, 0.5f, 0.5f);
+static float3 albedoMesh = (1.0f, 1.0f, 1.0f);
 static float3 emissivtyMesh = (0.1f, 0.1f, 0.1f);
-static float roughness = 0.3f;
-static float3 baseReflectane = (0.2f, 0.2f,0.2f);
+static float roughness = 0.2f;
+static float3 baseReflectane = (0.3f, 0.3f,0.3f);
 
 
 
@@ -23,7 +23,7 @@ float4 main(PS_Input input) : SV_TARGET
 
     //
     const float3 N = normalize(input.viewNormal);
-    const float3 V = normalize(input.viewFragPos);
+    const float3 V = normalize((0.0f, 0.0f, 0.0f) - input.viewFragPos);
     const float3 L = normalize(viewLightPos - input.viewFragPos);
     const float3 H = normalize(V + L);
 

@@ -24,7 +24,7 @@ public:
 			DirectX::XMFLOAT3 pos;
 			DirectX::XMFLOAT3 n;
 		};
-		auto model = SphereGeo::Make<Vertex>();
+		auto model = SphereGeo::MakeTesselated<Vertex>(96,192);
 		model.SetNormalsIndependentFlat();
 		//model.Transform(DirectX::XMMatrixScaling(0.2f, 0.2f, 0.2f));
 		// Vertex buffer stuff
@@ -154,7 +154,7 @@ public:
 				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))
 				* DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rotationAngle));
 
-			return  rotationMatrix * translation;
+			return   translation;
 		};
 		const auto model = updateRotationMatrix();
 
