@@ -24,7 +24,6 @@ private:
 		float attConst;
 		float attLin;
 		float attQuad;
-
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pLightCBuf;

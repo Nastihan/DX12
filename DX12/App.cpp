@@ -22,12 +22,17 @@ void App::DoFrame()
 	light.Update(wnd.Gfx(), cam.GetMatrix());
 	// render loop body
 
+	// reset command list
+	wnd.Gfx().ResetCmd();
 
 	// Draw Calls
 	//cube.Draw(wnd.Gfx());
 	test.Draw(wnd.Gfx());
 	light.Draw(wnd.Gfx());
 
+	// execute
+	wnd.Gfx().Execute();
+	wnd.Gfx().Sync();
 	
 
 

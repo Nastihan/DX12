@@ -76,14 +76,11 @@ void PointLight::Update(Graphics& gfx,DirectX::FXMMATRIX view)
 	// Map the upload buffer and keep it mapped during the lifetime of the application
 	void* pLightData = nullptr;
 	pUploadBuffer->Map(0, nullptr, &pLightData) >> chk;
-
 	auto dataCopy = cBufData;
 	const auto pos = DirectX::XMLoadFloat3(&cBufData.pos);
 	DirectX::XMStoreFloat3(&dataCopy.pos, DirectX::XMVector3Transform(pos, view));
-
 	// Update the constant buffer data with the latest values
 	memcpy(pLightData, &dataCopy, sizeof(PointLightCBuf));
-
 	pUploadBuffer->Unmap(0, nullptr);
 
 	// Copy the data from the upload buffer to the default heap (pLightCBuf)
@@ -108,10 +105,24 @@ void PointLight::SpawnControlWindow()
 {
 	if (ImGui::Begin("Light"))
 	{
+
 		ImGui::Text("Position");
 		ImGui::SliderFloat("X", &cBufData.pos.x, -70.0f, 70.0f);
 		ImGui::SliderFloat("Y", &cBufData.pos.y, -70.0f, 70.0f);
 		ImGui::SliderFloat("Z", &cBufData.pos.z, -70.0f, 70.0f);
+		ImGui::Text("Intensity/Color");
+		ImGui::SliderFloat("Intensity", &cBufData.diffuseIntensity, 0.01f, 2.0f, "%.2f");
+		ImGui::ColorEdit3("Diffuse Color", &cBufData.diffuseColor.x);
+		ImGui::ColorEdit3("Ambient", &cBufData.ambient.x);
+		ImGui::Text("Falloff");
+		ImGui::SliderFloat("Constant", &cBufData.attConst, 0.05f, 10.0f, "%.2f");
+		ImGui::SliderFloat("Linear", &cBufData.attLin, 0.0001f, 4.0f, "%.4f");
+		ImGui::SliderFloat("Quadratic", &cBufData.attQuad, 0.0000001f, 10.0f, "%.7f");
+		
+		if (ImGui::Button("Reset"))
+		{
+			Reset();
+		}
 
 	}
 	ImGui::End();

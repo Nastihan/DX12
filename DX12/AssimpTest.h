@@ -135,7 +135,6 @@ public:
 
 	void Draw(Graphics& gfx) const override
 	{
-		gfx.ResetCmd();
 		gfx.CommandList()->SetPipelineState(pPipelineState.Get());
 		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -148,10 +147,6 @@ public:
 		BindLight(gfx);
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
-
-
-		gfx.Execute();
-		gfx.Sync();
 	}
 
 	void BindLight(Graphics& gfx) const
