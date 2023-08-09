@@ -12,6 +12,7 @@
 #include <iostream>
 #include "SphereGeo.h"
 #include "BindableInclude.h"
+#include "imgui/imgui.h"
 
 class SpherePBR : public Drawable
 {
@@ -37,11 +38,15 @@ public:
 		}
 
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
-		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
+		CD3DX12_ROOT_PARAMETER rootParameters[3]{};
 		rootParameters[0].InitAsConstants(3 * (sizeof(DirectX::XMMATRIX) / 4), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 		// light desc table
-		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,0 };
-		rootParameters[1].InitAsDescriptorTable(1, &descRange, D3D12_SHADER_VISIBILITY_PIXEL);
+		const CD3DX12_DESCRIPTOR_RANGE descRange1{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,0 };
+		rootParameters[1].InitAsDescriptorTable(1, &descRange1, D3D12_SHADER_VISIBILITY_PIXEL);
+		// mesh cbuf table
+		MakeCBuf(gfx);
+		const CD3DX12_DESCRIPTOR_RANGE descRange2{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,1 };
+		rootParameters[2].InitAsDescriptorTable(1, &descRange2, D3D12_SHADER_VISIBILITY_PIXEL);
 
 		// static sampler
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
@@ -118,6 +123,8 @@ public:
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
 		// light
 		BindLight(gfx);	
+		// meshcbuf
+		BindCBuf(gfx);
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
 
@@ -127,6 +134,97 @@ public:
 		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetLight().GetHeap().Get() };
 		gfx.CommandList()->SetDescriptorHeaps(1, descriptorHeaps);
 		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetLight().GetHeap()->GetGPUDescriptorHandleForHeapStart());
+	}
+	void MakeCBuf(Graphics& gfx)
+	{
+		// constant buffer
+		const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
+		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(MeshCBuf));
+
+		gfx.Device()->CreateCommittedResource(
+			&heapProps,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(&pMeshCBuf)
+		) >> chk;
+
+		{
+			const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
+			const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(MeshCBuf));
+			gfx.Device()->CreateCommittedResource(
+				&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&pUploadBuffer)
+			) >> chk;
+		}
+
+		void* pMeshData = nullptr;
+		pUploadBuffer->Map(0, nullptr, &pMeshData) >> chk;
+		memcpy(pMeshData, &cBufData, sizeof(MeshCBuf));
+		pUploadBuffer->Unmap(0, nullptr);
+
+		gfx.ResetCmd();
+		gfx.CommandList()->CopyResource(pMeshCBuf.Get(), pUploadBuffer.Get());
+		gfx.Execute();
+		gfx.Sync();
+
+
+		// descriptor heap for the shader resource view
+		{
+			const D3D12_DESCRIPTOR_HEAP_DESC heapDesc{
+				.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+				.NumDescriptors = 1,
+				.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+			};
+			gfx.Device()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&pHeap)) >> chk;
+		}
+		// create handle to the srv heap and to the only view in the heap 
+		D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = pHeap->GetCPUDescriptorHandleForHeapStart();
+		// create the descriptor in the heap 
+		{
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+			cbvDesc.BufferLocation = pMeshCBuf->GetGPUVirtualAddress();
+			cbvDesc.SizeInBytes = (UINT)sizeof(cBufData);
+			gfx.Device()->CreateConstantBufferView(&cbvDesc, cbvHandle);
+		}
+	}
+	void BindCBuf(Graphics& gfx) const
+	{
+		ID3D12DescriptorHeap* descriptorHeaps[] = { pHeap.Get()};
+		gfx.CommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(2, pHeap->GetGPUDescriptorHandleForHeapStart());
+	}
+	void UpdateCbuf(Graphics& gfx)
+	{
+		// Map the upload buffer and keep it mapped during the lifetime of the application
+		void* pMeshData = nullptr;
+		pUploadBuffer->Map(0, nullptr, &pMeshData) >> chk;
+		auto dataCopy = cBufData;
+		// Update the constant buffer data with the latest values
+		memcpy(pMeshData, &dataCopy, sizeof(MeshCBuf));
+		pUploadBuffer->Unmap(0, nullptr);
+
+		// Copy the data from the upload buffer to the default heap (pLightCBuf)
+		gfx.ResetCmd();
+		gfx.CommandList()->CopyResource(pMeshCBuf.Get(), pUploadBuffer.Get());
+		gfx.Execute();
+		gfx.Sync();
+	}
+	void SpawnControlWindow()
+	{
+		if (ImGui::Begin("Sphere"))
+		{
+			ImGui::SliderFloat("Albedo R", &cBufData.albedo.x, 0.0f, 1.0f);
+			ImGui::SliderFloat("Albedo G", &cBufData.albedo.y, 0.0f, 1.0f);
+			ImGui::SliderFloat("Albedo B", &cBufData.albedo.z, 0.0f, 1.0f);
+
+		}
+		ImGui::End();
 	}
 	DirectX::XMMATRIX GetTransform() const noexcept override
 	{
@@ -161,6 +259,14 @@ public:
 		return model;
 	}
 private:
+	struct alignas(256) MeshCBuf
+	{
+		alignas(16) DirectX::XMFLOAT3 albedo{1.0f, 0.0f, 0.0f};
+		alignas(16) DirectX::XMFLOAT3 emissivty{0.0f, 0.0f, 0.0f};
+		alignas(16) DirectX::XMFLOAT3 baseReflectane = { 0.4f, 0.4f, 0.4f };
+		float roughness = 0.3f;
+	};
+private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pPipelineState;
 	// vertex buffer 
@@ -169,7 +275,11 @@ private:
 	std::unique_ptr<IndexBuffer> pIndexBuffer;
 	// position
 	DirectX::XMFLOAT3 pos;
-
+	// constant buffer stuff
+	MeshCBuf cBufData;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pMeshCBuf;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> pHeap;
 
 
 };

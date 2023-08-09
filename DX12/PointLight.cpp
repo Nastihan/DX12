@@ -66,6 +66,7 @@ PointLight::PointLight(Graphics& gfx)
 
 void PointLight::Draw(Graphics& gfx)
 {
+	
 	mesh.SetPos(cBufData.pos);
 	mesh.Draw(gfx);
 

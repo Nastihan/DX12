@@ -10,10 +10,13 @@ struct PS_Input
     float4 pos : SV_Position;
 };
 
-static const float3 albedoMesh = float3(1.0f, 0.0f, 0.0f);
-static const float3 emissivtyMesh = float3(0.0f, 0.0f, 0.0f);
-static const float roughness = 0.3f;
-static const float3 baseReflectane = float3(0.4f, 0.4f, 0.4f);
+cbuffer mesh : register(b1)
+{
+    float3 albedoMesh ;
+    float3 emissivtyMesh;
+    float3 baseReflectane ;
+    float roughness ;
+}
 
 
 

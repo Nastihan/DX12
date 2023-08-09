@@ -20,9 +20,12 @@ void App::DoFrame()
 {
 	wnd.Gfx().BeginFrame();
 	wnd.Gfx().SetCamera(cam.GetMatrix());
-	light.Update(wnd.Gfx(), cam.GetMatrix());
-	// render loop body
 
+	// update buffers
+	light.Update(wnd.Gfx(), cam.GetMatrix());
+	spherePBR.UpdateCbuf(wnd.Gfx());
+	
+	// render loop body begin
 	// reset command list
 	wnd.Gfx().ResetCmd();
 
@@ -31,6 +34,8 @@ void App::DoFrame()
 	//cube.Draw(wnd.Gfx());
 	//test.Draw(wnd.Gfx());
 	spherePBR.Draw(wnd.Gfx());
+
+
 
 	// execute
 	wnd.Gfx().Execute();
@@ -41,6 +46,7 @@ void App::DoFrame()
 	// Imgui Calls
 	light.SpawnControlWindow();
 	cam.SpawnControlWindow();
+	spherePBR.SpawnControlWindow();
 
 	// render loop body end
 	wnd.Gfx().EndFrame();
