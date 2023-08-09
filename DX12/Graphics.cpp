@@ -181,7 +181,7 @@ Graphics::~Graphics()
 {
 	ImGui_ImplDX12_Shutdown();
 	// !!!!!! should fix the annoying bug
-	//delete light;
+	light = nullptr;
 }
 
 void Graphics::BeginFrame()
