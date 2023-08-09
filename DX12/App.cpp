@@ -27,10 +27,10 @@ void App::DoFrame()
 	wnd.Gfx().ResetCmd();
 
 	// Draw Calls
+	light.Draw(wnd.Gfx());
 	//cube.Draw(wnd.Gfx());
 	//test.Draw(wnd.Gfx());
 	spherePBR.Draw(wnd.Gfx());
-	light.Draw(wnd.Gfx());
 
 	// execute
 	wnd.Gfx().Execute();

@@ -40,9 +40,9 @@ float4 main(PS_Input input) : SV_TARGET
     float3 BRDF = Kd * Lambert + cookTorrance;
     
     float3 att = Attenuate(attConst, attLin, attQuad, lvData.distToL);
-    float3 lightIntensity =  att * diffuseColor * diffuseIntensity;
-    float3 outgoingLight = emissivtyMesh + BRDF * lightIntensity  * max(dot(L, N), 0.0f);
+    float lightIntensity =  att * diffuseColor * diffuseIntensity;
+    float3 outgoingLight = ambient +  emissivtyMesh + BRDF * lightIntensity  * max(dot(L, N), 0.0f);
     
-    return float4(outgoingLight.x,outgoingLight.y,outgoingLight.z, 1.0f);
+    return float4((outgoingLight), 1.0f);
  
 }
