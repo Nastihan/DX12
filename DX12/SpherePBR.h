@@ -19,6 +19,8 @@ class SpherePBR : public Drawable
 public:
 	SpherePBR(Graphics& gfx)
 	{
+		MakeCBuf(gfx);
+
 		// Vertex data structure
 		struct Vertex
 		{
@@ -44,7 +46,6 @@ public:
 		const CD3DX12_DESCRIPTOR_RANGE descRange1{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,0 };
 		rootParameters[1].InitAsDescriptorTable(1, &descRange1, D3D12_SHADER_VISIBILITY_PIXEL);
 		// mesh cbuf table
-		MakeCBuf(gfx);
 		const CD3DX12_DESCRIPTOR_RANGE descRange2{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,1 };
 		rootParameters[2].InitAsDescriptorTable(1, &descRange2, D3D12_SHADER_VISIBILITY_PIXEL);
 
@@ -121,12 +122,19 @@ public:
 		auto transform = std::make_unique<TransformCbuf>(*this);
 		auto mvp = transform->GetTransforms(gfx);
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
-		// light
-		BindLight(gfx);	
-		// meshcbuf
-		BindCBuf(gfx);
+		
+		ID3D12DescriptorHeap* descriptorHeapsLight[] = { gfx.GetLight().GetHeap().Get() };
+		gfx.CommandList()->SetDescriptorHeaps(std::size(descriptorHeapsLight), descriptorHeapsLight);
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetLight().GetHeap()->GetGPUDescriptorHandleForHeapStart());
+
+		ID3D12DescriptorHeap* descriptorHeapsMesh[] = { pHeap.Get() };
+		gfx.CommandList()->SetDescriptorHeaps(std::size(descriptorHeapsMesh), descriptorHeapsMesh);
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(2, pHeap->GetGPUDescriptorHandleForHeapStart());
+
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
+	
+
 
 	}
 
@@ -289,6 +297,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pMeshCBuf;
 	Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> pHeap;
-
 
 };

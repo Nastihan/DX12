@@ -193,7 +193,6 @@ void Graphics::BeginFrame()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
-
 	// advance backbuffer
 	curBackBufferIndex = pSwapChain->GetCurrentBackBufferIndex();
 	// 

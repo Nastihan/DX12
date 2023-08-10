@@ -40,8 +40,6 @@ void App::DoFrame()
 	// execute
 	wnd.Gfx().Execute();
 	wnd.Gfx().Sync();
-	
-
 
 	// Imgui Calls
 	light.SpawnControlWindow();
