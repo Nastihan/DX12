@@ -42,19 +42,11 @@ PointLight::PointLight(Graphics& gfx)
 	gfx.CommandList()->CopyResource(pLightCBuf.Get(), pUploadBuffer.Get());
 	gfx.Execute();
 	gfx.Sync();
-
-
-	// descriptor heap for the shader resource view
-	{
-		const D3D12_DESCRIPTOR_HEAP_DESC heapDesc{
-			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-			.NumDescriptors = 1,
-			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-		};
-		gfx.Device()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&pHeap)) >> chk;
-	}
+	
 	// create handle to the srv heap and to the only view in the heap 
-	D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = pHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetCPUDescriptorHandleForHeapStart();
+	cbvHandle.ptr += gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 	// create the descriptor in the heap 
 	{
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};

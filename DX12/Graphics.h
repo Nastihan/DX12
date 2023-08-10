@@ -74,8 +74,14 @@ public:
 	}
 	void ImguiConfig()
 	{
-		pCommandList->SetDescriptorHeaps(1, srvDescriptorHeap.GetAddressOf());
+		pCommandList->SetDescriptorHeaps(1, cbvsrvuavDescriptorHeap.GetAddressOf());
 	}
+	// CBV SRV UAV heap getter
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetHeap()
+	{
+		return cbvsrvuavDescriptorHeap;
+	}
+
 	// static declartion of pso stream structure
 	struct PipelineStateStream
 	{
@@ -123,7 +129,8 @@ private:
 	// rt and ds descriptor heaps
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> cbvsrvuavDescriptorHeap;
+
 
 	// rtv handle for the buffer used in frame
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv;

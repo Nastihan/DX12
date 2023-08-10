@@ -105,16 +105,18 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		}
 	}
 
-	// srv descriptor heap for imgui
+	// CbvSrvUav descriptor heap for imgui and drawables constant buffers
 	{
 		const D3D12_DESCRIPTOR_HEAP_DESC desc =
 		{
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-			.NumDescriptors = 1,
+			.NumDescriptors = 3,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
 		};
-		pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&srvDescriptorHeap)) >> chk;
+		pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&cbvsrvuavDescriptorHeap)) >> chk;
 	}
+
+
 
 	// depth buffer
 	{
@@ -171,9 +173,9 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 
 	// init imgui dx12 impl
 	ImGui_ImplDX12_Init(pDevice.Get(), bufferCount, DXGI_FORMAT_R8G8B8A8_UNORM,
-		srvDescriptorHeap.Get(),
-		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart()
+		cbvsrvuavDescriptorHeap.Get(),
+		cbvsrvuavDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		cbvsrvuavDescriptorHeap->GetGPUDescriptorHandleForHeapStart()
 	);
 }
 

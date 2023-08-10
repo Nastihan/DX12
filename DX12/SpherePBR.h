@@ -122,20 +122,19 @@ public:
 		auto transform = std::make_unique<TransformCbuf>(*this);
 		auto mvp = transform->GetTransforms(gfx);
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
-		
-		ID3D12DescriptorHeap* descriptorHeapsLight[] = { gfx.GetLight().GetHeap().Get() };
-		gfx.CommandList()->SetDescriptorHeaps(std::size(descriptorHeapsLight), descriptorHeapsLight);
-		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetLight().GetHeap()->GetGPUDescriptorHandleForHeapStart());
+		//
+		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetHeap().Get()};
+		gfx.CommandList()->SetDescriptorHeaps(std::size(descriptorHeaps), descriptorHeaps);
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart());
 
-		ID3D12DescriptorHeap* descriptorHeapsMesh[] = { pHeap.Get() };
-		gfx.CommandList()->SetDescriptorHeaps(std::size(descriptorHeapsMesh), descriptorHeapsMesh);
-		gfx.CommandList()->SetGraphicsRootDescriptorTable(2, pHeap->GetGPUDescriptorHandleForHeapStart());
+		D3D12_GPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart();
+		cbvHandle.ptr += gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(2, cbvHandle);
 
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
 	
-
-
 	}
 
 	void MakeCBuf(Graphics& gfx)
@@ -176,18 +175,10 @@ public:
 		gfx.Execute();
 		gfx.Sync();
 
-
-		// descriptor heap for the shader resource view
-		{
-			const D3D12_DESCRIPTOR_HEAP_DESC heapDesc{
-				.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-				.NumDescriptors = 1,
-				.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-			};
-			gfx.Device()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&pHeap)) >> chk;
-		}
 		// create handle to the srv heap and to the only view in the heap 
-		D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = pHeap->GetCPUDescriptorHandleForHeapStart();
+		D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetCPUDescriptorHandleForHeapStart();
+		cbvHandle.ptr +=  2 * gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 		// create the descriptor in the heap 
 		{
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
