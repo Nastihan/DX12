@@ -42,9 +42,9 @@ void App::DoFrame()
 	wnd.Gfx().Sync();
 
 	// Imgui Calls
-	light.SpawnControlWindow();
-	cam.SpawnControlWindow();
-	spherePBR.SpawnControlWindow();
+	//light.SpawnControlWindow();
+	//cam.SpawnControlWindow();
+	//spherePBR.SpawnControlWindow();
 
 	// render loop body end
 	wnd.Gfx().EndFrame();

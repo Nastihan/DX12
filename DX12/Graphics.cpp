@@ -172,16 +172,16 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	}
 
 	// init imgui dx12 impl
-	ImGui_ImplDX12_Init(pDevice.Get(), bufferCount, DXGI_FORMAT_R8G8B8A8_UNORM,
+	/*ImGui_ImplDX12_Init(pDevice.Get(), bufferCount, DXGI_FORMAT_R8G8B8A8_UNORM,
 		cbvsrvuavDescriptorHeap.Get(),
 		cbvsrvuavDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		cbvsrvuavDescriptorHeap->GetGPUDescriptorHandleForHeapStart()
-	);
+	);*/
 }
 
 Graphics::~Graphics()
 {
-	ImGui_ImplDX12_Shutdown();
+	//ImGui_ImplDX12_Shutdown();
 	// !!!!!! should fix the annoying bug
 	light = nullptr;
 }
@@ -189,12 +189,12 @@ Graphics::~Graphics()
 void Graphics::BeginFrame()
 {
 	// imgui frame begin
-	if (imguiEnabled)
+	/*if (imguiEnabled)
 	{
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-	}
+	}*/
 	// advance backbuffer
 	curBackBufferIndex = pSwapChain->GetCurrentBackBufferIndex();
 	// 
@@ -229,13 +229,13 @@ void Graphics::EndFrame()
 	ResetCmd();
 
 	// imgui frame end
-	if (imguiEnabled)
+	/*if (imguiEnabled)
 	{
 		ImGui::Render();
 		ImguiConfig();
 		ConfigForDraw();
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
-	}
+	}*/
 
 	// prepare buffer for presentation by transitioning to present state
 	auto& backBuffer = pBackBuffers[curBackBufferIndex];

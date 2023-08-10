@@ -124,6 +124,7 @@ public:
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
 		//
 		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetHeap().Get()};
+
 		gfx.CommandList()->SetDescriptorHeaps(std::size(descriptorHeaps), descriptorHeaps);
 		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart());
 
@@ -177,7 +178,7 @@ public:
 
 		// create handle to the srv heap and to the only view in the heap 
 		D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetCPUDescriptorHandleForHeapStart();
-		cbvHandle.ptr +=  2 * gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		cbvHandle.ptr += gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		// create the descriptor in the heap 
 		{
