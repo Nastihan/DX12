@@ -130,6 +130,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> cbvsrvuavDescriptorHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> imguiHeap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> imguiTex;
 
 
 	// rtv handle for the buffer used in frame

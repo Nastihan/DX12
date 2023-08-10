@@ -110,11 +110,31 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		const D3D12_DESCRIPTOR_HEAP_DESC desc =
 		{
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-			.NumDescriptors = 3,
+			.NumDescriptors = 1,
+			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
+		};
+		pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&imguiHeap)) >> chk;
+	}
+	D3D12_CPU_DESCRIPTOR_HANDLE imguiHandle = imguiHeap->GetCPUDescriptorHandleForHeapStart();
+	// create the descriptor in the heap for imgui
+	{
+		const D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{
+			.Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+			.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
+			.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+		};
+		pDevice->CreateShaderResourceView(imguiTex.Get(), &srvDesc, imguiHandle);
+	}
+	{
+		const D3D12_DESCRIPTOR_HEAP_DESC desc =
+		{
+			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			.NumDescriptors = 2,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
 		};
 		pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&cbvsrvuavDescriptorHeap)) >> chk;
 	}
+	
 
 
 
@@ -172,16 +192,16 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	}
 
 	// init imgui dx12 impl
-	/*ImGui_ImplDX12_Init(pDevice.Get(), bufferCount, DXGI_FORMAT_R8G8B8A8_UNORM,
-		cbvsrvuavDescriptorHeap.Get(),
-		cbvsrvuavDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		cbvsrvuavDescriptorHeap->GetGPUDescriptorHandleForHeapStart()
-	);*/
+	ImGui_ImplDX12_Init(pDevice.Get(), bufferCount, DXGI_FORMAT_R8G8B8A8_UNORM,
+		imguiHeap.Get(),
+		imguiHeap->GetCPUDescriptorHandleForHeapStart(),
+		imguiHeap->GetGPUDescriptorHandleForHeapStart()
+	);
 }
 
 Graphics::~Graphics()
 {
-	//ImGui_ImplDX12_Shutdown();
+	ImGui_ImplDX12_Shutdown();
 	// !!!!!! should fix the annoying bug
 	light = nullptr;
 }
@@ -189,12 +209,12 @@ Graphics::~Graphics()
 void Graphics::BeginFrame()
 {
 	// imgui frame begin
-	/*if (imguiEnabled)
+	if (imguiEnabled)
 	{
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-	}*/
+	}
 	// advance backbuffer
 	curBackBufferIndex = pSwapChain->GetCurrentBackBufferIndex();
 	// 
@@ -228,14 +248,17 @@ void Graphics::EndFrame()
 {
 	ResetCmd();
 
+	ID3D12DescriptorHeap* descriptorHeaps[] = { imguiHeap.Get()};
+	pCommandList->SetDescriptorHeaps(1, descriptorHeaps);
+
 	// imgui frame end
-	/*if (imguiEnabled)
+	if (imguiEnabled)
 	{
 		ImGui::Render();
 		ImguiConfig();
 		ConfigForDraw();
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
-	}*/
+	}
 
 	// prepare buffer for presentation by transitioning to present state
 	auto& backBuffer = pBackBuffers[curBackBufferIndex];
