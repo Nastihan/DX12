@@ -129,12 +129,7 @@ public:
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
 
 	}
-	void BindLight(Graphics& gfx) const
-	{
-		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetLight().GetHeap().Get() };
-		gfx.CommandList()->SetDescriptorHeaps(1, descriptorHeaps);
-		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetLight().GetHeap()->GetGPUDescriptorHandleForHeapStart());
-	}
+
 	void MakeCBuf(Graphics& gfx)
 	{
 		// constant buffer
@@ -193,12 +188,21 @@ public:
 			gfx.Device()->CreateConstantBufferView(&cbvDesc, cbvHandle);
 		}
 	}
+
 	void BindCBuf(Graphics& gfx) const
 	{
 		ID3D12DescriptorHeap* descriptorHeaps[] = { pHeap.Get()};
 		gfx.CommandList()->SetDescriptorHeaps(1, descriptorHeaps);
 		gfx.CommandList()->SetGraphicsRootDescriptorTable(2, pHeap->GetGPUDescriptorHandleForHeapStart());
 	}
+
+	void BindLight(Graphics& gfx) const
+	{
+		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetLight().GetHeap().Get() };
+		gfx.CommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetLight().GetHeap()->GetGPUDescriptorHandleForHeapStart());
+	}
+
 	void UpdateCbuf(Graphics& gfx)
 	{
 		// Map the upload buffer and keep it mapped during the lifetime of the application
@@ -215,6 +219,7 @@ public:
 		gfx.Execute();
 		gfx.Sync();
 	}
+
 	void SpawnControlWindow()
 	{
 		if (ImGui::Begin("Sphere"))
@@ -222,10 +227,14 @@ public:
 			ImGui::SliderFloat("Albedo R", &cBufData.albedo.x, 0.0f, 1.0f);
 			ImGui::SliderFloat("Albedo G", &cBufData.albedo.y, 0.0f, 1.0f);
 			ImGui::SliderFloat("Albedo B", &cBufData.albedo.z, 0.0f, 1.0f);
+			ImGui::SliderFloat3("Emissivity", reinterpret_cast<float*>(&cBufData.emissivity), 0.0f, 1.0f);
+			ImGui::SliderFloat3("Base reflectance", reinterpret_cast<float*>(&cBufData.baseReflectance), 0.0f, 1.0f);
+			ImGui::SliderFloat("Roughness", &cBufData.roughness, 0.0f, 1.0f);
 
 		}
 		ImGui::End();
 	}
+
 	DirectX::XMMATRIX GetTransform() const noexcept override
 	{
 		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
@@ -262,8 +271,8 @@ private:
 	struct alignas(256) MeshCBuf
 	{
 		alignas(16) DirectX::XMFLOAT3 albedo{1.0f, 0.0f, 0.0f};
-		alignas(16) DirectX::XMFLOAT3 emissivty{0.0f, 0.0f, 0.0f};
-		alignas(16) DirectX::XMFLOAT3 baseReflectane = { 0.4f, 0.4f, 0.4f };
+		alignas(16) DirectX::XMFLOAT3 emissivity{0.0f, 0.0f, 0.0f};
+		alignas(16) DirectX::XMFLOAT3 baseReflectance = { 0.4f, 0.4f, 0.4f };
 		float roughness = 0.3f;
 	};
 private:
