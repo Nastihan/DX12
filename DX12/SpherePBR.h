@@ -19,7 +19,10 @@ class SpherePBR : public Drawable
 public:
 	SpherePBR(Graphics& gfx)
 	{
-		MakeCBuf(gfx);
+
+		pCBuf = std::make_unique<ConstantBuffer<MeshCBuf>>(gfx, cBufData);
+
+		//MakeCBuf(gfx);
 
 		// Vertex data structure
 		struct Vertex
@@ -204,19 +207,7 @@ public:
 
 	void UpdateCbuf(Graphics& gfx)
 	{
-		// Map the upload buffer and keep it mapped during the lifetime of the application
-		void* pMeshData = nullptr;
-		pUploadBuffer->Map(0, nullptr, &pMeshData) >> chk;
-		auto dataCopy = cBufData;
-		// Update the constant buffer data with the latest values
-		memcpy(pMeshData, &dataCopy, sizeof(MeshCBuf));
-		pUploadBuffer->Unmap(0, nullptr);
-
-		// Copy the data from the upload buffer to the default heap (pLightCBuf)
-		gfx.ResetCmd();
-		gfx.CommandList()->CopyResource(pMeshCBuf.Get(), pUploadBuffer.Get());
-		gfx.Execute();
-		gfx.Sync();
+		pCBuf->Update(gfx, cBufData);
 	}
 
 	void SpawnControlWindow()
@@ -281,6 +272,8 @@ private:
 	std::unique_ptr<VertexBuffer> pVertexBuffer;
 	// index buffer 
 	std::unique_ptr<IndexBuffer> pIndexBuffer;
+	// constant buffer
+	std::unique_ptr<ConstantBuffer<MeshCBuf>> pCBuf;
 	// position
 	DirectX::XMFLOAT3 pos;
 	// constant buffer stuff

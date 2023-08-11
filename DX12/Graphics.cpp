@@ -106,39 +106,24 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	}
 
 	// CbvSrvUav descriptor heap for imgui and drawables constant buffers
-	
-		const D3D12_DESCRIPTOR_HEAP_DESC desc1 =
+	{
+		const D3D12_DESCRIPTOR_HEAP_DESC desc =
 		{
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-			.NumDescriptors = 2,
+			.NumDescriptors = 7,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
 		};
-		pDevice->CreateDescriptorHeap(&desc1, IID_PPV_ARGS(&cbvsrvuavDescriptorHeap)) >> chk;
-	
-	
-		const D3D12_DESCRIPTOR_HEAP_DESC desc2 =
+		pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&cbvsrvuavDescriptorHeap)) >> chk;
+	}
+	{
+		const D3D12_DESCRIPTOR_HEAP_DESC desc =
 		{
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 			.NumDescriptors = 1,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
 		};
-		pDevice->CreateDescriptorHeap(&desc2, IID_PPV_ARGS(&imguiHeap)) >> chk;
-	
-	// create the descriptor in the heap for imgui
-	//{
-	//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	//	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // Set the appropriate format
-	//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	//	srvDesc.Texture2D.MipLevels = 1;
-	//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//	pDevice->CreateShaderResourceView(imguiTex.Get(), &srvDesc, imguiHandle);
-	//}
-	
-	
-	
-
-
-
+		pDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&imguiHeap)) >> chk;
+	}
 	// depth buffer
 	{
 		const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };

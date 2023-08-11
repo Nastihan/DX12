@@ -16,17 +16,18 @@ public:
 private:
 	struct alignas(256) PointLightCBuf
 	{
-		alignas(16) DirectX::XMFLOAT3 pos;
-		alignas(16) DirectX::XMFLOAT3 ambient;
-		alignas(16) DirectX::XMFLOAT3 diffuseColor;
-		float diffuseIntensity;
-		float attConst;
-		float attLin;
-		float attQuad;
+		alignas(16) DirectX::XMFLOAT3 pos = { 0.0f,0.0f,0.0f };
+		alignas(16) DirectX::XMFLOAT3 ambient = { 0.02f,0.02f,0.02f };
+		alignas(16) DirectX::XMFLOAT3 diffuseColor = { 1.0f,1.0f,1.0f };
+		float diffuseIntensity = 1.0f;
+		float attConst = 1.0f;
+		float attLin = 0.045f;
+		float attQuad = 0.0075f;
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> pLightCBuf;
 	Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
-	PointLightCBuf cBufData = {};
+	std::unique_ptr<ConstantBuffer<PointLightCBuf>> pCBuf;
+	PointLightCBuf cBufData ;
 	mutable Sphere mesh;
 };

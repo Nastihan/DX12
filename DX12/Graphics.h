@@ -82,6 +82,11 @@ public:
 	{
 		return cbvsrvuavDescriptorHeap;
 	}
+	uint32_t GetHeapCountAndIncrement()
+	{
+		heapCount++;
+		return heapCount - 1;
+	}
 
 	// static declartion of pso stream structure
 	struct PipelineStateStream
@@ -131,9 +136,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> cbvsrvuavDescriptorHeap;
+	// count of descriptor in the cbv srv heap
+	uint32_t heapCount = 0U;
+	// exclusive heap used by imgui
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> imguiHeap;
-
-
 	// rtv handle for the buffer used in frame
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv;

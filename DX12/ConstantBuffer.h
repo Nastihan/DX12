@@ -43,8 +43,9 @@ public:
 		gfx.Execute();
 		gfx.Sync();
 
-		// create handle to the cbv-srv heap and to theview in the heap 
+		// create handle to the cbv-srv heap and to the view in the heap 
 		D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetCPUDescriptorHandleForHeapStart();
+		cbvHandle.ptr += gfx.GetHeapCountAndIncrement() * gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		// create the descriptor in the heap 
 		{
@@ -62,6 +63,24 @@ public:
 		auto dataCopy = consts;
 		// Update the constant buffer data with the latest values
 		memcpy(pData, &dataCopy, sizeof(consts));
+		pUploadBuffer->Unmap(0, nullptr);
+
+		// Copy the data from the upload buffer to the default heap (pLightCBuf)
+		gfx.ResetCmd();
+		gfx.CommandList()->CopyResource(pBuffer.Get(), pUploadBuffer.Get());
+		gfx.Execute();
+		gfx.Sync();
+	}
+	void UpdateLight(Graphics& gfx, const C& consts, DirectX::FXMMATRIX view)
+	{
+		// Map the upload buffer and keep it mapped during the lifetime of the application
+		void* pData = nullptr;
+		pUploadBuffer->Map(0, nullptr, &pData) >> chk;
+		auto dataCopy = consts;
+		const auto pos = DirectX::XMLoadFloat3(&consts.pos);
+		DirectX::XMStoreFloat3(&dataCopy.pos, DirectX::XMVector3Transform(pos, view));
+		// Update the constant buffer data with the latest values
+		memcpy(pData, &dataCopy, sizeof(C));
 		pUploadBuffer->Unmap(0, nullptr);
 
 		// Copy the data from the upload buffer to the default heap (pLightCBuf)

@@ -5,54 +5,9 @@
 PointLight::PointLight(Graphics& gfx)
 	: mesh(gfx)
 {
-	Reset();
+	//Reset();
 
-	// constant buffer
-	const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-	const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(cBufData));
-
-	gfx.Device()->CreateCommittedResource(
-		&heapProps,
-		D3D12_HEAP_FLAG_NONE,
-		&resourceDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		nullptr,
-		IID_PPV_ARGS(&pLightCBuf)
-	) >> chk;
-
-	{
-		const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-		const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(cBufData));
-		gfx.Device()->CreateCommittedResource(
-			&heapProps,
-			D3D12_HEAP_FLAG_NONE,
-			&resourceDesc,
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(&pUploadBuffer)
-		) >> chk;
-	}
-
-	void* pLightData = nullptr;
-	pUploadBuffer->Map(0, nullptr, &pLightData) >> chk;
-	memcpy(pLightData, &cBufData,sizeof(PointLightCBuf));
-	pUploadBuffer->Unmap(0,nullptr);
-
-	gfx.ResetCmd();
-	gfx.CommandList()->CopyResource(pLightCBuf.Get(), pUploadBuffer.Get());
-	gfx.Execute();
-	gfx.Sync();
-	
-	// create handle to the srv heap and to the only view in the heap 
-	D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetCPUDescriptorHandleForHeapStart();
-
-	// create the descriptor in the heap 
-	{
-		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-		cbvDesc.BufferLocation = pLightCBuf->GetGPUVirtualAddress();
-		cbvDesc.SizeInBytes = (UINT)sizeof(cBufData); 
-		gfx.Device()->CreateConstantBufferView(&cbvDesc,cbvHandle);
-	}
+	pCBuf = std::make_unique<ConstantBuffer<PointLightCBuf>>(gfx, cBufData);
 }
 
 void PointLight::Draw(Graphics& gfx)
@@ -65,21 +20,8 @@ void PointLight::Draw(Graphics& gfx)
 
 void PointLight::Update(Graphics& gfx,DirectX::FXMMATRIX view)
 {
-	// Map the upload buffer and keep it mapped during the lifetime of the application
-	void* pLightData = nullptr;
-	pUploadBuffer->Map(0, nullptr, &pLightData) >> chk;
-	auto dataCopy = cBufData;
-	const auto pos = DirectX::XMLoadFloat3(&cBufData.pos);
-	DirectX::XMStoreFloat3(&dataCopy.pos, DirectX::XMVector3Transform(pos, view));
-	// Update the constant buffer data with the latest values
-	memcpy(pLightData, &dataCopy, sizeof(PointLightCBuf));
-	pUploadBuffer->Unmap(0, nullptr);
 
-	// Copy the data from the upload buffer to the default heap (pLightCBuf)
-	gfx.ResetCmd();
-	gfx.CommandList()->CopyResource(pLightCBuf.Get(), pUploadBuffer.Get());
-	gfx.Execute();
-	gfx.Sync();
+	pCBuf->UpdateLight(gfx, cBufData,view);
 }
 
 void PointLight::Reset()
