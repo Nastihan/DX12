@@ -24,10 +24,9 @@ private:
 	ImguiManager imgui;
 	Window wnd;
 	NastihanTimer timer;
-	PointLight light;
+	PointLight light{ wnd.Gfx() };
 	Camera cam;
-	SpherePBR spherePBR;
-	//Cube cube;
-	AssimpTest test;
+	SpherePBR spherePBR{ wnd.Gfx() };
+	AssimpTest test{ wnd.Gfx() };
 	bool showDemoWindow = true;
 };

@@ -45,7 +45,7 @@ void Camera::Translate(DirectX::XMFLOAT3 translation)
 void Camera::Rotate(float dx, float dy)
 {
 	yaw = wrap_angle(yaw + dx * rotationSpeed);
-	pitch = std::clamp(pitch + dy * rotationSpeed,  -PI / 2.0f, PI / 2.0f);
+	pitch = std::clamp(pitch + dy * rotationSpeed, 0.999f * -PI / 2.0f, 0.999f * PI / 2.0f);
 }
 
 void Camera::SpawnControlWindow() noexcept
