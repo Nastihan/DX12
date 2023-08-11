@@ -120,8 +120,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Device5> pDevice;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> pCommandQueue;
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> pSwapChain;
-	// !manually writing the buffer count
-	Microsoft::WRL::ComPtr<ID3D12Resource> pBackBuffers[2];
+	Microsoft::WRL::ComPtr<ID3D12Resource> pBackBuffers[2]; // !!!!!!!manually writing the buffer count
 	Microsoft::WRL::ComPtr<ID3D12Resource> pDepthBuffer;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> pCommandAllocator;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> pCommandList;

@@ -46,6 +46,20 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 	// device
 	D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&pDevice)) >> chk;
 
+	// check for ray tracing
+	{
+		D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {}; 
+		pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5)) >> chk; 
+		if (options5.RaytracingTier < D3D12_RAYTRACING_TIER_1_0)
+		{
+			throw std::runtime_error("Raytracing not supported on device");
+		}
+		else
+		{
+			std::cout << "Raytraxing is supported on the device" << std::endl;
+		}
+	}
+
 	// command queue
 	D3D12_COMMAND_QUEUE_DESC cqDesc = {
 		.Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
