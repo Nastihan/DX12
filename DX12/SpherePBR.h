@@ -113,6 +113,7 @@ public:
 	}
 	void Draw(Graphics& gfx) const override
 	{
+
 		gfx.CommandList()->SetPipelineState(pPipelineState.Get());
 		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -136,6 +137,7 @@ public:
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
 	
+
 	}
 
 	void MakeCBuf(Graphics& gfx)
@@ -178,7 +180,7 @@ public:
 
 		// create handle to the srv heap and to the only view in the heap 
 		D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetCPUDescriptorHandleForHeapStart();
-		cbvHandle.ptr += gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		cbvHandle.ptr += 1 * gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		// create the descriptor in the heap 
 		{

@@ -74,7 +74,8 @@ public:
 	}
 	void ImguiConfig()
 	{
-		pCommandList->SetDescriptorHeaps(1, cbvsrvuavDescriptorHeap.GetAddressOf());
+		ID3D12DescriptorHeap* descriptorHeaps[] = { imguiHeap.Get() };
+		pCommandList->SetDescriptorHeaps(1, descriptorHeaps);
 	}
 	// CBV SRV UAV heap getter
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetHeap()
@@ -131,7 +132,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> cbvsrvuavDescriptorHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> imguiHeap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> imguiTex;
 
 
 	// rtv handle for the buffer used in frame

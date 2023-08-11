@@ -35,8 +35,6 @@ void App::DoFrame()
 	//test.Draw(wnd.Gfx());
 	spherePBR.Draw(wnd.Gfx());
 
-
-
 	// execute
 	wnd.Gfx().Execute();
 	wnd.Gfx().Sync();
