@@ -15,31 +15,39 @@ App::App()
 void App::DoFrame()
 {
 	wnd.Gfx().BeginFrame();
-	wnd.Gfx().SetCamera(cam.GetMatrix());
+	if (!wnd.Gfx().RTEnabled())
+	{
+		wnd.Gfx().SetCamera(cam.GetMatrix());
 
-	// update buffers
-	light.Update(wnd.Gfx(), cam.GetMatrix());
-	spherePBR.Update(wnd.Gfx());
-	
-	// render loop body begin
-	// reset command list
-	wnd.Gfx().ResetCmd();
+		// update buffers
+		light.Update(wnd.Gfx(), cam.GetMatrix());
+		spherePBR.Update(wnd.Gfx());
 
-	// Draw Calls
-	light.Draw(wnd.Gfx());
-	//cube.Draw(wnd.Gfx());
-	//test.Draw(wnd.Gfx());
-	spherePBR.Draw(wnd.Gfx());
+		// render loop body begin
+		// reset command list
+		wnd.Gfx().ResetCmd();
 
-	// execute
-	wnd.Gfx().Execute();
-	wnd.Gfx().Sync();
+		// Draw Calls
+		light.Draw(wnd.Gfx());
+		//cube.Draw(wnd.Gfx());
+		//test.Draw(wnd.Gfx());
+		spherePBR.Draw(wnd.Gfx());
 
-	// Imgui Calls
-	light.SpawnControlWindow();
-	cam.SpawnControlWindow();
-	spherePBR.SpawnControlWindow();
-	ShowFPSWindow();
+		// execute
+		wnd.Gfx().Execute();
+		wnd.Gfx().Sync();
+
+		// Imgui Calls
+		light.SpawnControlWindow();
+		cam.SpawnControlWindow();
+		spherePBR.SpawnControlWindow();
+		ShowFPSWindow();
+	}
+	else 
+	{
+
+	}
+
 
 	// render loop body end
 	wnd.Gfx().EndFrame();
@@ -47,56 +55,73 @@ void App::DoFrame()
 
 void App::HandleInput(float dt)
 {
-	static bool spaceKeyPressedPrev = false;
-	bool spaceKeyPressed = glfwGetKey(&wnd.Wnd(), GLFW_KEY_SPACE) == GLFW_PRESS;
-	if (spaceKeyPressed && !spaceKeyPressedPrev) {
+	static bool xKeyPressedPrev = false;
+	bool xKeyPressed = glfwGetKey(&wnd.Wnd(), GLFW_KEY_X) == GLFW_PRESS;
+	if (xKeyPressed && !xKeyPressedPrev) {
 		// Toggle cursor state
-		if (wnd.CursorEnabled()) {
-			wnd.DisableCursor();
+		if (wnd.Gfx().RTEnabled()) {
+			wnd.Gfx().DisableRT();
 		}
 		else {
-			wnd.EnableCursor();
+			wnd.Gfx().EnableRT();
 		}
 	}
-	spaceKeyPressedPrev = spaceKeyPressed;
-
-
-	if (!wnd.CursorEnabled())
-	{
-		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_W) == GLFW_PRESS)
-		{
-			cam.Translate({ 0.0f,0.0f,dt });
-		}
-		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_S) == GLFW_PRESS)
-		{
-			cam.Translate({ 0.0f,0.0f,-dt });
-		}
-		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_A) == GLFW_PRESS)
-		{
-			cam.Translate({ -dt,0.0f,0.0f });
-		}
-		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_D) == GLFW_PRESS)
-		{
-			cam.Translate({ dt,0.0f,0.0f });
-		}
-		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_R) == GLFW_PRESS)
-		{
-			cam.Translate({ 0.0f,dt,0.0f });
-		}
-		if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_F) == GLFW_PRESS)
-		{
-			cam.Translate({ 0.0f,-dt,0.0f });
-		}
-
-	}
+	xKeyPressedPrev = xKeyPressed;
 	
+	if (!wnd.Gfx().RTEnabled())
 	{
-		double mouseX, mouseY;
-		glfwGetCursorPos(&wnd.Wnd(), &mouseX, &mouseY);
-		const auto delta = wnd.GetMouseDelta((float)mouseX,(float)mouseY);
+
+		static bool spaceKeyPressedPrev = false;
+		bool spaceKeyPressed = glfwGetKey(&wnd.Wnd(), GLFW_KEY_SPACE) == GLFW_PRESS;
+		if (spaceKeyPressed && !spaceKeyPressedPrev) {
+			// Toggle cursor state
+			if (wnd.CursorEnabled()) {
+				wnd.DisableCursor();
+			}
+			else {
+				wnd.EnableCursor();
+			}
+		}
+		spaceKeyPressedPrev = spaceKeyPressed;
+
+
 		if (!wnd.CursorEnabled())
 		{
-			cam.Rotate((float)delta.x, (float)delta.y);
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_W) == GLFW_PRESS)
+			{
+				cam.Translate({ 0.0f,0.0f,dt });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_S) == GLFW_PRESS)
+			{
+				cam.Translate({ 0.0f,0.0f,-dt });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_A) == GLFW_PRESS)
+			{
+				cam.Translate({ -dt,0.0f,0.0f });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_D) == GLFW_PRESS)
+			{
+				cam.Translate({ dt,0.0f,0.0f });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_R) == GLFW_PRESS)
+			{
+				cam.Translate({ 0.0f,dt,0.0f });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_F) == GLFW_PRESS)
+			{
+				cam.Translate({ 0.0f,-dt,0.0f });
+			}
+
+		}
+
+		{
+			double mouseX, mouseY;
+			glfwGetCursorPos(&wnd.Wnd(), &mouseX, &mouseY);
+			const auto delta = wnd.GetMouseDelta((float)mouseX, (float)mouseY);
+			if (!wnd.CursorEnabled())
+			{
+				cam.Rotate((float)delta.x, (float)delta.y);
+			}
 		}
 	}
 }

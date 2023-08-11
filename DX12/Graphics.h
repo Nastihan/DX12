@@ -109,7 +109,11 @@ public:
 	void EnableImgui() noexcept;
 	void DisableImgui() noexcept;
 	bool IsImguiEnabled() const noexcept;
+	void EnableRT() noexcept;
+	void DisableRT() noexcept;
+	bool RTEnabled() const noexcept;
 private:
+	bool rtEnabled = false;
 	bool imguiEnabled = true;
 	DirectX::XMMATRIX camera;
 	DirectX::XMMATRIX projection;

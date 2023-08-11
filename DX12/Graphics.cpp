@@ -330,3 +330,18 @@ bool Graphics::IsImguiEnabled() const noexcept
 {
 	return imguiEnabled;
 }
+
+void Graphics::EnableRT() noexcept
+{
+	rtEnabled = true;
+}
+
+void Graphics::DisableRT() noexcept
+{
+	rtEnabled = false;
+}
+
+bool Graphics::RTEnabled() const noexcept
+{
+	return rtEnabled;
+}
