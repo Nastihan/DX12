@@ -120,7 +120,3 @@ void PointLight::SpawnControlWindow()
 	ImGui::End();
 }
 
-Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> PointLight::GetHeap()
-{
-	return pHeap;
-}

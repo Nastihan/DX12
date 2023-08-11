@@ -151,9 +151,9 @@ public:
 
 	void BindLight(Graphics& gfx) const
 	{
-		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetLight().GetHeap().Get()};
+		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetHeap().Get()};
 		gfx.CommandList()->SetDescriptorHeaps(1, descriptorHeaps);
-		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetLight().GetHeap()->GetGPUDescriptorHandleForHeapStart());
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart());
 	}
 
 	DirectX::XMMATRIX GetTransform() const noexcept override
