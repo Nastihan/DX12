@@ -191,6 +191,7 @@
     <ClInclude Include="AssimpTest.h" />
     <ClInclude Include="BindableInclude.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Graphics.h" />
