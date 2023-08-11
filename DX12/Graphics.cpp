@@ -253,10 +253,8 @@ void Graphics::EndFrame()
 	if (imguiEnabled)
 	{
 		ImGui::Render();
-		ImguiConfig();
 		ConfigForDraw();
-		ID3D12DescriptorHeap* descriptorHeaps[] = { imguiHeap.Get() };
-		pCommandList->SetDescriptorHeaps(1, descriptorHeaps);
+		ImguiConfig();
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
 	}
 

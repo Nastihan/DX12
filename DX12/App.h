@@ -19,6 +19,7 @@ public:
 private:
 	void DoFrame();
 	void HandleInput(float dt);
+	void ShowFPSWindow();
 private:
 	ImguiManager imgui;
 	Window wnd;

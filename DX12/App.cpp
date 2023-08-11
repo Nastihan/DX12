@@ -43,6 +43,7 @@ void App::DoFrame()
 	light.SpawnControlWindow();
 	cam.SpawnControlWindow();
 	spherePBR.SpawnControlWindow();
+	ShowFPSWindow();
 
 	// render loop body end
 	wnd.Gfx().EndFrame();
@@ -102,6 +103,15 @@ void App::HandleInput(float dt)
 			cam.Rotate((float)delta.x, (float)delta.y);
 		}
 	}
+}
+
+void App::ShowFPSWindow()
+{
+	if (ImGui::Begin("FPS"))
+	{
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	}
+	ImGui::End();
 }
 
 void App::Run()
