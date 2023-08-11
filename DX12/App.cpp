@@ -23,7 +23,7 @@ void App::DoFrame()
 
 	// update buffers
 	light.Update(wnd.Gfx(), cam.GetMatrix());
-	spherePBR.UpdateCbuf(wnd.Gfx());
+	spherePBR.Update(wnd.Gfx());
 	
 	// render loop body begin
 	// reset command list

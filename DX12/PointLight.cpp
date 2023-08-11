@@ -5,7 +5,7 @@
 PointLight::PointLight(Graphics& gfx)
 	: mesh(gfx)
 {
-	//Reset();
+	Reset();
 
 	pCBuf = std::make_unique<ConstantBuffer<PointLightCBuf>>(gfx, cBufData);
 }

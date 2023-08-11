@@ -22,8 +22,6 @@ public:
 
 		pCBuf = std::make_unique<ConstantBuffer<MeshCBuf>>(gfx, cBufData);
 
-		//MakeCBuf(gfx);
-
 		// Vertex data structure
 		struct Vertex
 		{
@@ -116,7 +114,6 @@ public:
 	}
 	void Draw(Graphics& gfx) const override
 	{
-
 		gfx.CommandList()->SetPipelineState(pPipelineState.Get());
 		gfx.CommandList()->SetGraphicsRootSignature(pRootSignature.Get());
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -129,83 +126,18 @@ public:
 		// set heaps
 		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetHeap().Get()};
 		gfx.CommandList()->SetDescriptorHeaps(std::size(descriptorHeaps), descriptorHeaps);
-
+		// light cbuffer
 		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart());
-
+		// mesh cbuffer
 		D3D12_GPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart();
 		cbvHandle.ptr += gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
 		gfx.CommandList()->SetGraphicsRootDescriptorTable(2, cbvHandle);
 
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
-	
-
 	}
 
-	void MakeCBuf(Graphics& gfx)
-	{
-		// constant buffer
-		const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_DEFAULT };
-		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(MeshCBuf));
-
-		gfx.Device()->CreateCommittedResource(
-			&heapProps,
-			D3D12_HEAP_FLAG_NONE,
-			&resourceDesc,
-			D3D12_RESOURCE_STATE_COMMON,
-			nullptr,
-			IID_PPV_ARGS(&pMeshCBuf)
-		) >> chk;
-
-		{
-			const CD3DX12_HEAP_PROPERTIES heapProps{ D3D12_HEAP_TYPE_UPLOAD };
-			const auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(MeshCBuf));
-			gfx.Device()->CreateCommittedResource(
-				&heapProps,
-				D3D12_HEAP_FLAG_NONE,
-				&resourceDesc,
-				D3D12_RESOURCE_STATE_GENERIC_READ,
-				nullptr,
-				IID_PPV_ARGS(&pUploadBuffer)
-			) >> chk;
-		}
-
-		void* pMeshData = nullptr;
-		pUploadBuffer->Map(0, nullptr, &pMeshData) >> chk;
-		memcpy(pMeshData, &cBufData, sizeof(MeshCBuf));
-		pUploadBuffer->Unmap(0, nullptr);
-
-		gfx.ResetCmd();
-		gfx.CommandList()->CopyResource(pMeshCBuf.Get(), pUploadBuffer.Get());
-		gfx.Execute();
-		gfx.Sync();
-
-		// create handle to the srv heap and to the only view in the heap 
-		D3D12_CPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetCPUDescriptorHandleForHeapStart();
-		cbvHandle.ptr += 1 * gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-		// create the descriptor in the heap 
-		{
-			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-			cbvDesc.BufferLocation = pMeshCBuf->GetGPUVirtualAddress();
-			cbvDesc.SizeInBytes = (UINT)sizeof(cBufData);
-			gfx.Device()->CreateConstantBufferView(&cbvDesc, cbvHandle);
-		}
-	}
-
-	void BindCBuf(Graphics& gfx) const
-	{
-		D3D12_GPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart();
-		cbvHandle.ptr += gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	}
-
-	void BindLight(Graphics& gfx) const
-	{
-		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart());
-	}
-
-	void UpdateCbuf(Graphics& gfx)
+	void Update(Graphics& gfx) 
 	{
 		pCBuf->Update(gfx, cBufData);
 	}
@@ -224,7 +156,6 @@ public:
 		}
 		ImGui::End();
 	}
-
 	DirectX::XMMATRIX GetTransform() const noexcept override
 	{
 		auto updateRotationMatrix = []() -> DirectX::XMMATRIX
@@ -272,14 +203,11 @@ private:
 	std::unique_ptr<VertexBuffer> pVertexBuffer;
 	// index buffer 
 	std::unique_ptr<IndexBuffer> pIndexBuffer;
-	// constant buffer
+	// mesh constant buffer
 	std::unique_ptr<ConstantBuffer<MeshCBuf>> pCBuf;
+	MeshCBuf cBufData;
 	// position
 	DirectX::XMFLOAT3 pos;
-	// constant buffer stuff
-	MeshCBuf cBufData;
-	Microsoft::WRL::ComPtr<ID3D12Resource> pMeshCBuf;
-	Microsoft::WRL::ComPtr<ID3D12Resource> pUploadBuffer;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> pHeap;
+
 
 };
