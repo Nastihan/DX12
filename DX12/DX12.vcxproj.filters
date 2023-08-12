@@ -242,6 +242,9 @@
     <ClInclude Include="DXR\DXRHelper.h">
       <Filter>DXR</Filter>
     </ClInclude>
+    <ClInclude Include="DXSampleHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">

@@ -12,6 +12,9 @@
 #include <dxcapi.h>
 
 #include <vector>
+//#include <DirectXMath.h>
+
+using namespace DirectX;
 
 namespace nv_helpers_dx12
 {
