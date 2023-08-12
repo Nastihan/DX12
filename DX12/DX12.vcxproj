@@ -189,6 +189,7 @@
     <ClCompile Include="NastihanTimer.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="TransformCbuf.cpp" />
+    <ClCompile Include="TriangleRT.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -227,6 +228,7 @@
     <ClInclude Include="NastihanMath.h" />
     <ClInclude Include="NastihanTimer.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="TriangleRT.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

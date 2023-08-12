@@ -46,6 +46,12 @@
     <Filter Include="Shaders\PBR">
       <UniqueIdentifier>{f4d51887-e5b2-42ea-9458-2bd00402e4f9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DXR">
+      <UniqueIdentifier>{6bd64634-13ad-4812-8331-44d862b3463b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Drawable">
+      <UniqueIdentifier>{47a2fe77-1fa9-4f1e-be9e-f01cdb415877}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -101,6 +107,24 @@
     </ClCompile>
     <ClCompile Include="PointLight.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DXR\BottomLevelASGenerator.cpp">
+      <Filter>DXR</Filter>
+    </ClCompile>
+    <ClCompile Include="DXR\RootSignatureGenerator.cpp">
+      <Filter>DXR</Filter>
+    </ClCompile>
+    <ClCompile Include="DXR\RaytracingPipelineGenerator.cpp">
+      <Filter>DXR</Filter>
+    </ClCompile>
+    <ClCompile Include="DXR\ShaderBindingTableGenerator.cpp">
+      <Filter>DXR</Filter>
+    </ClCompile>
+    <ClCompile Include="DXR\TopLevelASGenerator.cpp">
+      <Filter>DXR</Filter>
+    </ClCompile>
+    <ClCompile Include="TriangleRT.cpp">
+      <Filter>Source Files\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -196,6 +220,27 @@
     </ClInclude>
     <ClInclude Include="ConstantBuffer.h">
       <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="TriangleRT.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="DXR\ShaderBindingTableGenerator.h">
+      <Filter>DXR</Filter>
+    </ClInclude>
+    <ClInclude Include="DXR\RootSignatureGenerator.h">
+      <Filter>DXR</Filter>
+    </ClInclude>
+    <ClInclude Include="DXR\RaytracingPipelineGenerator.h">
+      <Filter>DXR</Filter>
+    </ClInclude>
+    <ClInclude Include="DXR\TopLevelASGenerator.h">
+      <Filter>DXR</Filter>
+    </ClInclude>
+    <ClInclude Include="DXR\BottomLevelASGenerator.h">
+      <Filter>DXR</Filter>
+    </ClInclude>
+    <ClInclude Include="DXR\DXRHelper.h">
+      <Filter>DXR</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

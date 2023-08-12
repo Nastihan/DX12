@@ -56,7 +56,7 @@ Graphics::Graphics(uint16_t width, uint16_t height, HWND hWnd)
 		}
 		else
 		{
-			std::cout << "Raytraxing is supported on the device" << std::endl;
+			std::cout << "Raytracing is supported on the device" << std::endl;
 		}
 	}
 
