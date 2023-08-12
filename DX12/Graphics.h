@@ -22,7 +22,7 @@ public:
 	void QueueEmpty();
 public:
 	// getter functions for the drawables
-	Microsoft::WRL::ComPtr<ID3D12Device2> Device()
+	Microsoft::WRL::ComPtr<ID3D12Device5> Device()
 	{
 		return pDevice;
 	}

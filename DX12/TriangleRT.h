@@ -2,6 +2,7 @@
 #include "Graphics.h"
 #include "DXR/TopLevelASGenerator.h"
 #include <dxcapi.h>
+#include "BindableInclude.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -12,18 +13,28 @@ struct AccelerationStructureBuffers
 	Microsoft::WRL::ComPtr<ID3D12Resource> pInstanceDesc; // Hold the matrices of the instances
 };
 
+struct Vertex
+{
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT4 color;
+};
+
 class TriangleRT
 {
 public:
+	TriangleRT(Graphics& gfx);
+
 	// passing a vector of pairs : first element is the resource holding the vertex buffer and the second element is the number of vertices
-	AccelerationStructureBuffers CreateBottomLevelAS(std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t>> vVertexBuffers);
-	void CreateTopLevelAS(const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX>>& instances);
-	void CreateAccelerationStructure();
+	AccelerationStructureBuffers CreateBottomLevelAS(Graphics& gfx, std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t>> vVertexBuffers);
+	void CreateTopLevelAS(Graphics& gfx, const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX>>& instances);
+	void CreateAccelerationStructure(Graphics& gfx);
 
 private:
 	ComPtr<ID3D12Resource> bottomLevelAS; // storage for the bottom level AS
 	nv_helpers_dx12::TopLevelASGenerator topLevelASGenerator;
 	AccelerationStructureBuffers topLevelASBuffers;
 	std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX>> instances;
+	// vertex buffer
+	std::unique_ptr<VertexBuffer> pVertexBuffer;
 };
 

@@ -151,7 +151,7 @@ public:
 			ImGui::SliderFloat("Albedo B", &cBufData.albedo.z, 0.0f, 1.0f);
 			ImGui::SliderFloat3("Emissivity", reinterpret_cast<float*>(&cBufData.emissivity), 0.0f, 1.0f);
 			ImGui::SliderFloat3("Base reflectance", reinterpret_cast<float*>(&cBufData.baseReflectance), 0.0f, 1.0f);
-			ImGui::SliderFloat("Roughness", &cBufData.roughness, 0.0f, 1.0f);
+			ImGui::SliderFloat("Roughness", &cBufData.roughness, 0.010f, 1.0f);
 
 		}
 		ImGui::End();

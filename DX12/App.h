@@ -11,6 +11,8 @@
 #include "Sphere.h"
 #include "PointLight.h"
 #include "SpherePBR.h"
+#include "TriangleRT.h"
+
 class App
 {
 public:
@@ -28,5 +30,6 @@ private:
 	Camera cam;
 	SpherePBR spherePBR{ wnd.Gfx() };
 	AssimpTest test{ wnd.Gfx() };
+	TriangleRT triangleRT{ wnd.Gfx() };
 	bool showDemoWindow = true;
 };
