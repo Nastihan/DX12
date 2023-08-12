@@ -13,6 +13,8 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	};
 	pVertexBuffer = std::make_unique<VertexBuffer>(gfx, vertices);
 
+	CreateAccelerationStructure(gfx);
+
 }
 
 // Create a bottom-level acceleration structure based on a list of vertex
@@ -97,6 +99,7 @@ void TriangleRT::CreateTopLevelAS(Graphics& gfx, const std::vector<std::pair<Com
 // structure required to raytrace the scene
 void TriangleRT::CreateAccelerationStructure(Graphics& gfx)
 {
+	gfx.ResetCmd();
 	// Build the bottom AS from the Triangle vertex buffer 
 	AccelerationStructureBuffers bottomLevelBuffers = 
 		CreateBottomLevelAS(gfx, {{pVertexBuffer->pVertexBuffer.Get(), 3}});
@@ -106,9 +109,6 @@ void TriangleRT::CreateAccelerationStructure(Graphics& gfx)
 	// Flush the command list and wait for it to finish 
 	gfx.Execute();
 	gfx.Sync();
-	// Once the command list is finished executing, reset it to be reused for rendering 
-	gfx.ResetCmd();
-	//gfx.CommandList()->Reset(m_commandAllocator.Get(), m_pipelineState.Get()) >> chk;
 	// Store the AS buffers. The rest of the buffers will be released once we exit the function
 	bottomLevelAS = bottomLevelBuffers.pResult;
 }
