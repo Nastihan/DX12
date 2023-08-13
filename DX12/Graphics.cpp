@@ -316,6 +316,16 @@ PointLight& Graphics::GetLight() const noexcept
 	return *light;
 }
 
+uint16_t Graphics::GetWidth() const noexcept
+{
+	return width;
+}
+
+uint16_t Graphics::GetHeight() const noexcept
+{
+	return height;
+}
+
 void Graphics::EnableImgui() noexcept
 {
 	imguiEnabled = true;

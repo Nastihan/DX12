@@ -33,9 +33,9 @@ TriangleRT::TriangleRT(Graphics& gfx)
 
 	// create RayTracing pipeline
 	nv_helpers_dx12::RayTracingPipelineGenerator pipeline(gfx.Device().Get());
-	pGenLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\RayGen.hlsl"); 
-	pMissLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\Miss.hlsl");
-	pHitLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\Hit.hlsl");
+	ComPtr<IDxcBlob> pGenLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\RayGen.hlsl"); 
+	ComPtr<IDxcBlob> pMissLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\Miss.hlsl");
+	ComPtr<IDxcBlob> pHitLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\Hit.hlsl");
 
 	pipeline.AddLibrary(pGenLibrary.Get(), { L"RayGen" });
 	pipeline.AddLibrary(pMissLibrary.Get(), { L"Miss" });
@@ -53,6 +53,53 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	pRTStateObject = pipeline.Generate();
 
 	pRTStateObject->QueryInterface(IID_PPV_ARGS(&pRTStateObjectProperties));
+
+	// output buffer
+	D3D12_RESOURCE_DESC resDesc = {};
+	resDesc.DepthOrArraySize = 1; 
+	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; 
+	resDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	resDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+	resDesc.Width = gfx.GetWidth();
+	resDesc.Height = gfx.GetHeight(); 
+	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	resDesc.MipLevels = 1; resDesc.SampleDesc.Count = 1; 
+	gfx.Device()->CreateCommittedResource(
+		&nv_helpers_dx12::kDefaultHeapProps, 
+		D3D12_HEAP_FLAG_NONE, &resDesc, 
+		D3D12_RESOURCE_STATE_COPY_SOURCE, nullptr, IID_PPV_ARGS(&pOutputResource)) >> chk;
+
+
+  // Create a SRV/UAV/CBV descriptor heap. We need 2 entries - 1 UAV for the
+  // raytracing output and 1 SRV for the TLAS
+	PSrvUavHeap = nv_helpers_dx12::CreateDescriptorHeap(
+		gfx.Device().Get(), 2, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true);
+
+	// Get a handle to the heap memory on the CPU side, to be able to write the
+	// descriptors directly
+	D3D12_CPU_DESCRIPTOR_HANDLE srvHandle =
+		PSrvUavHeap->GetCPUDescriptorHandleForHeapStart();
+
+	// Create the UAV. Based on the root signature we created it is the first
+	// entry. The Create View methods write the view information directly into
+	// srvHandle
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	gfx.Device()->CreateUnorderedAccessView(pOutputResource.Get(), nullptr, &uavDesc,
+		srvHandle);
+
+	// Add the Top Level AS SRV right after the raytracing output buffer
+	srvHandle.ptr += gfx.Device()->GetDescriptorHandleIncrementSize(
+		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.RaytracingAccelerationStructure.Location =
+		topLevelASBuffers.pResult->GetGPUVirtualAddress();
+	// Write the acceleration structure view in the heap
+	gfx.Device()->CreateShaderResourceView(nullptr, &srvDesc, srvHandle);
 }
 
 // Create a bottom-level acceleration structure based on a list of vertex

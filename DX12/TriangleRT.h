@@ -44,9 +44,10 @@ private:
 	// pipeline state
 	ComPtr<ID3D12StateObject> pRTStateObject;
 	ComPtr<ID3D12StateObjectProperties> pRTStateObjectProperties;
+	// output buffer 
+	ComPtr<ID3D12Resource> pOutputResource;
+	ComPtr<ID3D12DescriptorHeap> PSrvUavHeap;
 
-	ComPtr<IDxcBlob> pGenLibrary;
-	ComPtr<IDxcBlob> pMissLibrary;
-	ComPtr<IDxcBlob> pHitLibrary;
+
 };
 

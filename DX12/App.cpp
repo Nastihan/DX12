@@ -4,7 +4,7 @@
 
 
 App::App()
-	: wnd(2200, 1237.5, "DX12 Engine")
+	: wnd(2200, 1237, "DX12 Engine")
 {
 	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f/16.0f, 0.5f, 100.f));
 	wnd.Gfx().SetCamera(cam.GetMatrix());
