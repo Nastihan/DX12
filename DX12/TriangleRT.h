@@ -45,5 +45,8 @@ private:
 	ComPtr<ID3D12StateObject> pRTStateObject;
 	ComPtr<ID3D12StateObjectProperties> pRTStateObjectProperties;
 
+	ComPtr<IDxcBlob> pGenLibrary;
+	ComPtr<IDxcBlob> pMissLibrary;
+	ComPtr<IDxcBlob> pHitLibrary;
 };
 

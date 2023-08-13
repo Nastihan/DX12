@@ -14,8 +14,9 @@ TriangleRT::TriangleRT(Graphics& gfx)
 			{ { -0.25f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
 	};
 	pVertexBuffer = std::make_unique<VertexBuffer>(gfx, vertices);
-
+	// acceleration structures
 	CreateAccelerationStructure(gfx);
+
 	// create RayGen root signature
 	nv_helpers_dx12::RootSignatureGenerator rscG;
 	rscG.AddHeapRangesParameter(
@@ -23,15 +24,35 @@ TriangleRT::TriangleRT(Graphics& gfx)
 		{0 , 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1} }
 	);
 	pRayGenSignature = rscG.Generate(gfx.Device().Get(), true);
-
 	// create RayHit root signature
 	nv_helpers_dx12::RootSignatureGenerator rscH; 
 	pRayHitSignature = rscH.Generate(gfx.Device().Get(), true);
-
 	// create RayMiss root signature
 	nv_helpers_dx12::RootSignatureGenerator rscM;
 	pRayMissSignature = rscM.Generate(gfx.Device().Get(), true);
 
+	// create RayTracing pipeline
+	nv_helpers_dx12::RayTracingPipelineGenerator pipeline(gfx.Device().Get());
+	pGenLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\RayGen.hlsl"); 
+	pMissLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\Miss.hlsl");
+	pHitLibrary = nv_helpers_dx12::CompileShaderLibrary(L"ShadersRT\\Hit.hlsl");
+
+	pipeline.AddLibrary(pGenLibrary.Get(), { L"RayGen" });
+	pipeline.AddLibrary(pMissLibrary.Get(), { L"Miss" });
+	pipeline.AddLibrary(pHitLibrary.Get(), { L"ClosestHit" });
+
+	pipeline.AddHitGroup(L"HitGroup", L"ClosestHit");
+	pipeline.AddRootSignatureAssociation(pRayGenSignature.Get(), { L"RayGen" });
+	pipeline.AddRootSignatureAssociation(pRayMissSignature.Get(), { L"Miss" });
+	pipeline.AddRootSignatureAssociation(pRayHitSignature.Get(), { L"HitGroup" });
+
+	pipeline.SetMaxPayloadSize(4 * sizeof(float));
+	pipeline.SetMaxAttributeSize(2 * sizeof(float));
+	pipeline.SetMaxRecursionDepth(1);
+
+	pRTStateObject = pipeline.Generate();
+
+	pRTStateObject->QueryInterface(IID_PPV_ARGS(&pRTStateObjectProperties));
 }
 
 // Create a bottom-level acceleration structure based on a list of vertex
