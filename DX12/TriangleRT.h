@@ -47,6 +47,8 @@ private:
 	// output buffer 
 	ComPtr<ID3D12Resource> pOutputResource;
 	ComPtr<ID3D12DescriptorHeap> PSrvUavHeap;
+	// SBT
+	ComPtr<ID3D12Resource> pSBT;
 
 
 };

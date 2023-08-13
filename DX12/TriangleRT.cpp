@@ -4,6 +4,7 @@
 #include "DXR/BottomLevelASGenerator.h"
 #include "DXR/RaytracingPipelineGenerator.h"
 #include "DXR/RootSignatureGenerator.h"
+#include "DXR/ShaderBindingTableGenerator.h"
 
 TriangleRT::TriangleRT(Graphics& gfx)
 {
@@ -100,6 +101,46 @@ TriangleRT::TriangleRT(Graphics& gfx)
 		topLevelASBuffers.pResult->GetGPUVirtualAddress();
 	// Write the acceleration structure view in the heap
 	gfx.Device()->CreateShaderResourceView(nullptr, &srvDesc, srvHandle);
+
+	// create SBT
+	nv_helpers_dx12::ShaderBindingTableGenerator sbtHelper;
+	sbtHelper.Reset();
+
+	D3D12_GPU_DESCRIPTOR_HANDLE srvUavHeapHandle = PSrvUavHeap->GetGPUDescriptorHandleForHeapStart();
+
+	// The helper treats both root parameter pointers and heap pointers as void*,
+	// while DX12 uses the
+	// D3D12_GPU_DESCRIPTOR_HANDLE to define heap pointers. The pointer in this
+	// struct is a UINT64, which then has to be reinterpreted as a pointer.
+	auto heapPointer = reinterpret_cast<UINT64*>(srvUavHeapHandle.ptr);
+
+	// The ray generation only uses heap data
+	sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer });
+
+	// The miss and hit shaders do not access any external resources: instead they
+	// communicate their results through the ray payload
+	sbtHelper.AddMissProgram(L"Miss", {});
+
+	// Adding the triangle hit shader
+	sbtHelper.AddHitGroup(L"HitGroup",
+		{ (void*)(pVertexBuffer->pVertexBuffer->GetGPUVirtualAddress()) });
+
+	// Compute the size of the SBT given the number of shaders and their
+	// parameters
+	uint32_t sbtSize = sbtHelper.ComputeSBTSize();
+
+	// Create the SBT on the upload heap. This is required as the helper will use
+	// mapping to write the SBT contents. After the SBT compilation it could be
+	// copied to the default heap for performance.
+	pSBT = nv_helpers_dx12::CreateBuffer(
+		gfx.Device().Get(), sbtSize, D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, nv_helpers_dx12::kUploadHeapProps);
+	if (!pSBT) {
+		throw std::logic_error("Could not allocate the shader binding table");
+	}
+	// Compile the SBT from the shader and parameters info
+	sbtHelper.Generate(pSBT.Get(), pRTStateObjectProperties.Get());
+
 }
 
 // Create a bottom-level acceleration structure based on a list of vertex
