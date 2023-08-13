@@ -3,6 +3,7 @@
 #include "DXR/TopLevelASGenerator.h"
 #include <dxcapi.h>
 #include "BindableInclude.h"
+#include <ShaderBindingTableGenerator.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -23,6 +24,7 @@ class TriangleRT
 {
 public:
 	TriangleRT(Graphics& gfx);
+	void Draw(Graphics& gfx);
 
 	// passing a vector of pairs : first element is the resource holding the vertex buffer and the second element is the number of vertices
 	AccelerationStructureBuffers CreateBottomLevelAS(Graphics& gfx, std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t>> vVertexBuffers);
@@ -49,6 +51,7 @@ private:
 	ComPtr<ID3D12DescriptorHeap> PSrvUavHeap;
 	// SBT
 	ComPtr<ID3D12Resource> pSBT;
+	nv_helpers_dx12::ShaderBindingTableGenerator sbtHelper;
 
 
 };

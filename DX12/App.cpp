@@ -45,7 +45,7 @@ void App::DoFrame()
 	}
 	else 
 	{
-
+		triangleRT.Draw(wnd.Gfx());
 	}
 
 

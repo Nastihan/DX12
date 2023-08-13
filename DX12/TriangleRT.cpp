@@ -4,7 +4,6 @@
 #include "DXR/BottomLevelASGenerator.h"
 #include "DXR/RaytracingPipelineGenerator.h"
 #include "DXR/RootSignatureGenerator.h"
-#include "DXR/ShaderBindingTableGenerator.h"
 
 TriangleRT::TriangleRT(Graphics& gfx)
 {
@@ -103,7 +102,6 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	gfx.Device()->CreateShaderResourceView(nullptr, &srvDesc, srvHandle);
 
 	// create SBT
-	nv_helpers_dx12::ShaderBindingTableGenerator sbtHelper;
 	sbtHelper.Reset();
 
 	D3D12_GPU_DESCRIPTOR_HANDLE srvUavHeapHandle = PSrvUavHeap->GetGPUDescriptorHandleForHeapStart();
@@ -140,6 +138,40 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	}
 	// Compile the SBT from the shader and parameters info
 	sbtHelper.Generate(pSBT.Get(), pRTStateObjectProperties.Get());
+
+}
+
+void TriangleRT::Draw(Graphics& gfx)
+{
+
+	ID3D12DescriptorHeap* heaps[] = { PSrvUavHeap.Get() };
+	gfx.CommandList()->SetDescriptorHeaps(1, heaps);
+
+	// On the last frame, the raytracing output was used as a copy source, to Now we need to transition it to a UAV so that the shaders can write in it.
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		pOutputResource.Get(), D3D12_RESOURCE_STATE_COPY_SOURCE,
+		D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	gfx.CommandList()->ResourceBarrier(1, &barrier);
+
+	D3D12_DISPATCH_RAYS_DESC rayDesc{};
+	rayDesc.RayGenerationShaderRecord.StartAddress = pSBT->GetGPUVirtualAddress();
+	rayDesc.RayGenerationShaderRecord.SizeInBytes = sbtHelper.GetRayGenSectionSize();
+
+	rayDesc.MissShaderTable.StartAddress = pSBT->GetGPUVirtualAddress() + sbtHelper.GetMissSectionSize();
+	rayDesc.MissShaderTable.SizeInBytes = sbtHelper.GetMissSectionSize();
+	rayDesc.MissShaderTable.StrideInBytes = sbtHelper.GetMissEntrySize();
+
+	rayDesc.HitGroupTable.StartAddress = pSBT->GetGPUVirtualAddress()
+		+ sbtHelper.GetMissSectionSize() + sbtHelper.GetHitGroupSectionSize();
+	rayDesc.HitGroupTable.SizeInBytes = sbtHelper.GetHitGroupSectionSize();
+	rayDesc.HitGroupTable.StrideInBytes = sbtHelper.GetHitGroupEntrySize();
+
+	rayDesc.Width = gfx.GetWidth();
+	rayDesc.Height = gfx.GetHeight();
+	rayDesc.Depth = 1;
+
+	gfx.CommandList()->SetPipelineState1(pRTStateObject.Get());
+	gfx.CommandList()->DispatchRays(&rayDesc);
 
 }
 
