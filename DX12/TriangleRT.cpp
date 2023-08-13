@@ -1,7 +1,9 @@
 #include "TriangleRT.h"
+#include <dxcapi.h>
 #include "DXR/DXRHelper.h"
 #include "DXR/BottomLevelASGenerator.h"
-#include <dxcapi.h>
+#include "DXR/RaytracingPipelineGenerator.h"
+#include "DXR/RootSignatureGenerator.h"
 
 TriangleRT::TriangleRT(Graphics& gfx)
 {
@@ -14,8 +16,21 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	pVertexBuffer = std::make_unique<VertexBuffer>(gfx, vertices);
 
 	CreateAccelerationStructure(gfx);
+	// create RayGen root signature
+	nv_helpers_dx12::RootSignatureGenerator rscG;
+	rscG.AddHeapRangesParameter(
+		{ {0, 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_UAV,0},
+		{0 , 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1} }
+	);
+	pRayGenSignature = rscG.Generate(gfx.Device().Get(), true);
 
+	// create RayHit root signature
+	nv_helpers_dx12::RootSignatureGenerator rscH; 
+	pRayHitSignature = rscH.Generate(gfx.Device().Get(), true);
 
+	// create RayMiss root signature
+	nv_helpers_dx12::RootSignatureGenerator rscM;
+	pRayMissSignature = rscM.Generate(gfx.Device().Get(), true);
 
 }
 
@@ -49,7 +64,6 @@ AccelerationStructureBuffers TriangleRT::CreateBottomLevelAS(Graphics& gfx, std:
 	bottomLevelAS.Generate(gfx.CommandList().Get(), buffers.pScratch.Get(), buffers.pResult.Get(), false, nullptr);
 	return buffers;
 }
-
 
 // Create the main acceleration structure that holds all instances of the scene.
 // Similarly to the bottom-level AS generation, it is done in 3 steps: gathering

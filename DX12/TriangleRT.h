@@ -29,6 +29,7 @@ public:
 	void CreateTopLevelAS(Graphics& gfx, const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX>>& instances);
 	void CreateAccelerationStructure(Graphics& gfx);
 
+
 private:
 	ComPtr<ID3D12Resource> bottomLevelAS; // storage for the bottom level AS
 	nv_helpers_dx12::TopLevelASGenerator topLevelASGenerator;
@@ -36,5 +37,13 @@ private:
 	std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX>> instances;
 	// vertex buffer
 	std::unique_ptr<VertexBuffer> pVertexBuffer;
+	// root signatures
+	ComPtr<ID3D12RootSignature> pRayGenSignature;
+	ComPtr<ID3D12RootSignature> pRayHitSignature;
+	ComPtr<ID3D12RootSignature> pRayMissSignature;
+	// pipeline state
+	ComPtr<ID3D12StateObject> pRTStateObject;
+	ComPtr<ID3D12StateObjectProperties> pRTStateObjectProperties;
+
 };
 
