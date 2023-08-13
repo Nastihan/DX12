@@ -15,6 +15,8 @@ TriangleRT::TriangleRT(Graphics& gfx)
 
 	CreateAccelerationStructure(gfx);
 
+
+
 }
 
 // Create a bottom-level acceleration structure based on a list of vertex
