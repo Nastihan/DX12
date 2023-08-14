@@ -19,6 +19,7 @@ public:
 	~Graphics();
 	void BeginFrame();
 	void EndFrame();
+	void EndFrameRT(Microsoft::WRL::ComPtr<ID3D12Resource> output);
 	void QueueEmpty();
 public:
 	// getter functions for the drawables

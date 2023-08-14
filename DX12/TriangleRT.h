@@ -26,6 +26,11 @@ public:
 	TriangleRT(Graphics& gfx);
 	void Draw(Graphics& gfx);
 
+	ComPtr<ID3D12Resource> GetOutputBuffer()
+	{
+		return pOutputResource;
+	}
+
 	// passing a vector of pairs : first element is the resource holding the vertex buffer and the second element is the number of vertices
 	AccelerationStructureBuffers CreateBottomLevelAS(Graphics& gfx, std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t>> vVertexBuffers);
 	void CreateTopLevelAS(Graphics& gfx, const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX>>& instances);

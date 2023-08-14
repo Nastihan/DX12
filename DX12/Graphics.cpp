@@ -277,6 +277,49 @@ void Graphics::EndFrame()
 	}
 }
 
+void Graphics::EndFrameRT(Microsoft::WRL::ComPtr <ID3D12Resource> output)
+{
+	ResetCmd();
+
+	// imgui frame end
+	if (imguiEnabled)
+	{
+		ImGui::Render();
+		ConfigForDraw();
+		ImguiConfig();
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
+	}
+
+	// prepare buffer for presentation by transitioning to present state
+	auto& backBuffer = pBackBuffers[curBackBufferIndex];
+	const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+	pCommandList->ResourceBarrier(1, &barrier);
+
+	pCommandList->CopyResource(backBuffer.Get(), output.Get());
+
+	const auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	pCommandList->ResourceBarrier(1, &barrier2);
+
+	const auto barrier3 = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	pCommandList->ResourceBarrier(1, &barrier2);
+
+	// submit command list
+	Execute();
+
+	pCommandQueue->Signal(pFence.Get(), ++fenceValue) >> chk;
+
+	// present
+	pSwapChain->Present(1, 0);
+
+	pFence->SetEventOnCompletion(fenceValue, fenceEvent) >> chk;
+	if (WaitForSingleObject(fenceEvent, INFINITE) == WAIT_FAILED) {
+		GetLastError() >> chk;
+	}
+}
+
 void Graphics::QueueEmpty()
 {
 	pCommandQueue->Signal(pFence.Get(), ++fenceValue);

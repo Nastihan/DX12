@@ -42,20 +42,25 @@ void App::DoFrame()
 		cam.SpawnControlWindow();
 		spherePBR.SpawnControlWindow();
 		ShowFPSWindow();
+
+		wnd.Gfx().EndFrame();
 	}
 	else 
 	{
 
 		wnd.Gfx().ResetCmd();
+
+
 		triangleRT.Draw(wnd.Gfx());
 
 		wnd.Gfx().Execute();
 		wnd.Gfx().Sync();
+
+		wnd.Gfx().EndFrameRT(triangleRT.GetOutputBuffer());
 	}
 
 
 	// render loop body end
-	wnd.Gfx().EndFrame();
 }
 
 void App::HandleInput(float dt)

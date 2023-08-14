@@ -173,6 +173,12 @@ void TriangleRT::Draw(Graphics& gfx)
 	gfx.CommandList()->SetPipelineState1(pRTStateObject.Get());
 	gfx.CommandList()->DispatchRays(&rayDesc);
 
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		pOutputResource.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+	gfx.CommandList()->ResourceBarrier(1, &barrier);
+
 }
 
 // Create a bottom-level acceleration structure based on a list of vertex
