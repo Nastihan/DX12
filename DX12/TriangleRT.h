@@ -58,6 +58,5 @@ private:
 	ComPtr<ID3D12Resource> pSBT;
 	nv_helpers_dx12::ShaderBindingTableGenerator sbtHelper;
 
-
 };
 

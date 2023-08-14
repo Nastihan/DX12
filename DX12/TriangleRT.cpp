@@ -145,7 +145,7 @@ void TriangleRT::Draw(Graphics& gfx)
 {
 
 	ID3D12DescriptorHeap* heaps[] = { PSrvUavHeap.Get() };
-	gfx.CommandList()->SetDescriptorHeaps(1, heaps);
+	gfx.CommandList()->SetDescriptorHeaps(static_cast<UINT>(std::size(heaps)), heaps);
 
 	// On the last frame, the raytracing output was used as a copy source, to Now we need to transition it to a UAV so that the shaders can write in it.
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -153,16 +153,16 @@ void TriangleRT::Draw(Graphics& gfx)
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	gfx.CommandList()->ResourceBarrier(1, &barrier);
 
-	D3D12_DISPATCH_RAYS_DESC rayDesc{};
+	D3D12_DISPATCH_RAYS_DESC rayDesc = {};
 	rayDesc.RayGenerationShaderRecord.StartAddress = pSBT->GetGPUVirtualAddress();
 	rayDesc.RayGenerationShaderRecord.SizeInBytes = sbtHelper.GetRayGenSectionSize();
 
-	rayDesc.MissShaderTable.StartAddress = pSBT->GetGPUVirtualAddress() + sbtHelper.GetMissSectionSize();
+	rayDesc.MissShaderTable.StartAddress = (pSBT->GetGPUVirtualAddress() + sbtHelper.GetMissSectionSize()) +32 ;
 	rayDesc.MissShaderTable.SizeInBytes = sbtHelper.GetMissSectionSize();
 	rayDesc.MissShaderTable.StrideInBytes = sbtHelper.GetMissEntrySize();
 
-	rayDesc.HitGroupTable.StartAddress = pSBT->GetGPUVirtualAddress()
-		+ sbtHelper.GetMissSectionSize() + sbtHelper.GetHitGroupSectionSize();
+	rayDesc.HitGroupTable.StartAddress = (pSBT->GetGPUVirtualAddress()
+		+ sbtHelper.GetMissSectionSize() + sbtHelper.GetHitGroupSectionSize()) + 32;
 	rayDesc.HitGroupTable.SizeInBytes = sbtHelper.GetHitGroupSectionSize();
 	rayDesc.HitGroupTable.StrideInBytes = sbtHelper.GetHitGroupEntrySize();
 

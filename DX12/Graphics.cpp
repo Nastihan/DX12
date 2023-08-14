@@ -302,8 +302,6 @@ void Graphics::EndFrameRT(Microsoft::WRL::ComPtr <ID3D12Resource> output)
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT);
 	pCommandList->ResourceBarrier(1, &barrier2);
 
-
-
 	// submit command list
 	Execute();
 
