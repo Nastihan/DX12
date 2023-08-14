@@ -45,7 +45,12 @@ void App::DoFrame()
 	}
 	else 
 	{
+
+		wnd.Gfx().ResetCmd();
 		triangleRT.Draw(wnd.Gfx());
+
+		wnd.Gfx().Execute();
+		wnd.Gfx().Sync();
 	}
 
 
@@ -59,10 +64,14 @@ void App::HandleInput(float dt)
 	bool xKeyPressed = glfwGetKey(&wnd.Wnd(), GLFW_KEY_X) == GLFW_PRESS;
 	if (xKeyPressed && !xKeyPressedPrev) {
 		// Toggle cursor state
-		if (wnd.Gfx().RTEnabled()) {
+		if (wnd.Gfx().RTEnabled()) 
+		{			
+			wnd.Gfx().QueueEmpty();
 			wnd.Gfx().DisableRT();
 		}
-		else {
+		else 
+		{
+			wnd.Gfx().QueueEmpty();
 			wnd.Gfx().EnableRT();
 		}
 	}
@@ -145,6 +154,8 @@ void App::Run()
 
 		glfwPollEvents();
 		if (glfwWindowShouldClose(&wnd.Wnd()))
+		{
 			wnd.Gfx().QueueEmpty();
+		}
 	}
 }
