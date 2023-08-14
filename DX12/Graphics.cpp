@@ -299,12 +299,10 @@ void Graphics::EndFrameRT(Microsoft::WRL::ComPtr <ID3D12Resource> output)
 	pCommandList->CopyResource(backBuffer.Get(), output.Get());
 
 	const auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT);
 	pCommandList->ResourceBarrier(1, &barrier2);
 
-	const auto barrier3 = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	pCommandList->ResourceBarrier(1, &barrier2);
+
 
 	// submit command list
 	Execute();
