@@ -157,12 +157,12 @@ void TriangleRT::Draw(Graphics& gfx)
 	rayDesc.RayGenerationShaderRecord.StartAddress = pSBT->GetGPUVirtualAddress();
 	rayDesc.RayGenerationShaderRecord.SizeInBytes = sbtHelper.GetRayGenSectionSize();
 
-	rayDesc.MissShaderTable.StartAddress = (pSBT->GetGPUVirtualAddress() + sbtHelper.GetMissSectionSize()) +32 ;
+	rayDesc.MissShaderTable.StartAddress = (pSBT->GetGPUVirtualAddress() + sbtHelper.GetMissSectionSize()) ;
 	rayDesc.MissShaderTable.SizeInBytes = sbtHelper.GetMissSectionSize();
 	rayDesc.MissShaderTable.StrideInBytes = sbtHelper.GetMissEntrySize();
 
 	rayDesc.HitGroupTable.StartAddress = (pSBT->GetGPUVirtualAddress()
-		+ sbtHelper.GetMissSectionSize() + sbtHelper.GetHitGroupSectionSize()) + 32;
+		+ sbtHelper.GetMissSectionSize() + sbtHelper.GetHitGroupSectionSize()) ;
 	rayDesc.HitGroupTable.SizeInBytes = sbtHelper.GetHitGroupSectionSize();
 	rayDesc.HitGroupTable.StrideInBytes = sbtHelper.GetHitGroupEntrySize();
 
