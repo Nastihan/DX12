@@ -9,9 +9,9 @@ TriangleRT::TriangleRT(Graphics& gfx)
 {
 	const std::vector<Vertex> vertices =
 	{
-			{ { 0.0f, 0.25f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-			{ { 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-			{ { -0.25f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
+		{{0.0f, 0.25f , 0.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}, 
+		{{0.25f, -0.25f , 0.0f}, {0.0f, 1.0f, 1.0f, 1.0f}}, 
+		{{-0.25f, -0.25f , 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}}
 	};
 	pVertexBuffer = std::make_unique<VertexBuffer>(gfx, vertices);
 	// acceleration structures
@@ -26,6 +26,7 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	pRayGenSignature = rscG.Generate(gfx.Device().Get(), true);
 	// create RayHit root signature
 	nv_helpers_dx12::RootSignatureGenerator rscH; 
+	rscH.AddRootParameter(D3D12_ROOT_PARAMETER_TYPE_SRV);
 	pRayHitSignature = rscH.Generate(gfx.Device().Get(), true);
 	// create RayMiss root signature
 	nv_helpers_dx12::RootSignatureGenerator rscM;
