@@ -20,6 +20,7 @@ public:
 	DirectX::XMFLOAT2 GetMouseDelta(float x,float y);
 
 private:
+	HWND hwnd{};
 	bool cursorEnabled = true;
 	float lastMouseX;
 	float lastMouseY;

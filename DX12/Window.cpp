@@ -19,7 +19,7 @@ Window::Window(uint16_t width, uint16_t height, std::string title)
     // init imgui glfw
     ImGui_ImplGlfw_InitForOther(pWindow, true);
     // graphics object
-    pGfx = std::make_unique<Graphics>(width, height, glfwGetWin32Window(pWindow));
+    pGfx = std::make_unique<Graphics>(width, height, Hwnd());
 }
 
 Window::~Window()
@@ -44,7 +44,10 @@ GLFWwindow& Window::Wnd()
 
 HWND& Window::Hwnd()
 {
-    HWND hwnd = glfwGetWin32Window(pWindow);
+    if (!hwnd)
+    {
+        hwnd = glfwGetWin32Window(pWindow);
+    }
     return hwnd;
 }
 
