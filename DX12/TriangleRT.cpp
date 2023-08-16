@@ -10,9 +10,9 @@ TriangleRT::TriangleRT(Graphics& gfx)
 {
 	const std::vector<Vertex> vertices =
 	{
-		{{0.0f, 0.25f , 0.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}, 
-		{{0.25f, -0.25f , 0.0f}, {0.0f, 1.0f, 1.0f, 1.0f}}, 
-		{{-0.25f, -0.25f , 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}}
+		{{0.0f, 1.0f , 0.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}, 
+		{{1.0f, -1.0f , 0.0f}, {0.0f, 1.0f, 1.0f, 1.0f}}, 
+		{{-1.0f, -1.0f , 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}}
 	};
 	pVertexBuffer = std::make_unique<VertexBuffer>(gfx, vertices);
 	// acceleration structures
@@ -24,7 +24,7 @@ TriangleRT::TriangleRT(Graphics& gfx)
 		{ {0, 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_UAV,0},
 		{0 , 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1} }
 	);
-	rscG.AddRootParameter(D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS, 0, 0, 1);
+	rscG.AddRootParameter(D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS, 0, 0, 4);
 	pRayGenSignature = rscG.Generate(gfx.Device().Get(), true);
 	// create RayHit root signature
 	nv_helpers_dx12::RootSignatureGenerator rscH; 
@@ -118,7 +118,7 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	// The ray generation only uses heap data
 	auto transform = std::make_unique<TransformCbuf>(*this);
 	auto mvp = transform->GetTransformsRT(gfx);
-	sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer,(void*)&mvp });
+	sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer,&mvp });
 
 	// The miss and hit shaders do not access any external resources: instead they
 	// communicate their results through the ray payload
@@ -162,7 +162,7 @@ void TriangleRT::Draw(Graphics& gfx) const
 	rayDesc.RayGenerationShaderRecord.StartAddress = pSBT->GetGPUVirtualAddress();
 	rayDesc.RayGenerationShaderRecord.SizeInBytes = sbtHelper.GetRayGenSectionSize();
 
-	rayDesc.MissShaderTable.StartAddress = (pSBT->GetGPUVirtualAddress() + sbtHelper.GetMissSectionSize()) + 32;
+	rayDesc.MissShaderTable.StartAddress = (pSBT->GetGPUVirtualAddress() + sbtHelper.GetMissSectionSize()) ;
 	rayDesc.MissShaderTable.SizeInBytes = sbtHelper.GetMissSectionSize();
 	rayDesc.MissShaderTable.StrideInBytes = sbtHelper.GetMissEntrySize();
 
@@ -206,7 +206,7 @@ DirectX::XMMATRIX TriangleRT::GetTransform() const noexcept
 			rotationAngle += rotationSpeed * deltaTime;
 
 			// Calculate the new rotation matrix
-			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(3.0f, 0.0f, 2.0f);
+			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 			DirectX::XMMATRIX rotationMatrix =
 				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
 				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))
