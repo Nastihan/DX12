@@ -20,3 +20,26 @@ TransformCbuf::Transforms TransformCbuf::GetTransforms(Graphics& gfx)
 		)
 	};
 }
+
+TransformCbuf::TransformsRT TransformCbuf::GetTransformsRT(Graphics& gfx)
+{
+	assert(pParent != nullptr);
+	const auto view = gfx.GetCamera();
+	DirectX::XMVECTOR determinant;
+	return {
+		DirectX::XMMatrixTranspose(view),
+		DirectX::XMMatrixTranspose(
+			view *
+			gfx.GetProjection()
+		),
+		DirectX::XMMatrixTranspose(
+			DirectX::XMMatrixInverse(
+				&determinant, view
+			)),
+		DirectX::XMMatrixTranspose(
+			DirectX::XMMatrixInverse(
+				&determinant,( view *
+					gfx.GetProjection())
+			))
+	};
+}

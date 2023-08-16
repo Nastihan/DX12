@@ -47,14 +47,22 @@ void App::DoFrame()
 	}
 	else 
 	{
+		wnd.Gfx().SetCamera(cam.GetMatrix());
 
+		// render loop body begin
 		wnd.Gfx().ResetCmd();
 
 
 		triangleRT.Draw(wnd.Gfx());
 
+
+		// execute
 		wnd.Gfx().Execute();
 		wnd.Gfx().Sync();
+
+		// Imgui calls
+		cam.SpawnControlWindow();
+
 
 		wnd.Gfx().EndFrameRT(triangleRT.GetOutputBuffer());
 	}
@@ -138,6 +146,63 @@ void App::HandleInput(float dt)
 			}
 		}
 	}
+
+	if (wnd.Gfx().RTEnabled())
+	{
+		static bool spaceKeyPressedPrev = false;
+		bool spaceKeyPressed = glfwGetKey(&wnd.Wnd(), GLFW_KEY_SPACE) == GLFW_PRESS;
+		if (spaceKeyPressed && !spaceKeyPressedPrev) {
+			// Toggle cursor state
+			if (wnd.CursorEnabled()) {
+				wnd.DisableCursor();
+			}
+			else {
+				wnd.EnableCursor();
+			}
+		}
+		spaceKeyPressedPrev = spaceKeyPressed;
+
+
+		if (!wnd.CursorEnabled())
+		{
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_W) == GLFW_PRESS)
+			{
+				cam.Translate({ 0.0f,0.0f,dt });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_S) == GLFW_PRESS)
+			{
+				cam.Translate({ 0.0f,0.0f,-dt });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_A) == GLFW_PRESS)
+			{
+				cam.Translate({ -dt,0.0f,0.0f });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_D) == GLFW_PRESS)
+			{
+				cam.Translate({ dt,0.0f,0.0f });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_R) == GLFW_PRESS)
+			{
+				cam.Translate({ 0.0f,dt,0.0f });
+			}
+			if (glfwGetKey(&wnd.Wnd(), GLFW_KEY_F) == GLFW_PRESS)
+			{
+				cam.Translate({ 0.0f,-dt,0.0f });
+			}
+
+		}
+
+		{
+			double mouseX, mouseY;
+			glfwGetCursorPos(&wnd.Wnd(), &mouseX, &mouseY);
+			const auto delta = wnd.GetMouseDelta((float)mouseX, (float)mouseY);
+			if (!wnd.CursorEnabled())
+			{
+				cam.Rotate((float)delta.x, (float)delta.y);
+			}
+		}
+	}
+
 }
 
 void App::ShowFPSWindow()
