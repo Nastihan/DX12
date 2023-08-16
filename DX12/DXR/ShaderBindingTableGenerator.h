@@ -152,7 +152,7 @@ public:
   /// Get the size in bytes of the SBT section dedicated to miss programs
   UINT GetMissSectionSize() const;
   /// Get the size in bytes of one miss program entry in the SBT
-  UINT GetMissEntrySize();
+  UINT GetMissEntrySize() const;
 
   /// Get the size in bytes of the SBT section dedicated to hit groups
   UINT GetHitGroupSectionSize() const;
