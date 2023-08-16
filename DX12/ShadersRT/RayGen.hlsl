@@ -30,8 +30,9 @@ ConstantBuffer<MVP> mvp : register(b0);
   // values
     RayDesc ray;
     ray.Origin = mul(float4(0, 0, 0, 1), mvp.viewI);
-    float4 target = mul(float4(d.x, -d.y, 1, 1), mvp.projI);
-    ray.Direction = mul(float4(target.xyz, 0), mvp.viewI);
+    float4 target = float4(d.x, -d.y, 1, 1);
+    float4 targetView = mul(target, mvp.projI);
+    ray.Direction = normalize(targetView.xyz / targetView.w - ray.Origin.xyz);
     ray.TMin = 0;
     ray.TMax = 100000;
     

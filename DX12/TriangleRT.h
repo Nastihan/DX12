@@ -64,29 +64,6 @@ public:
 
 	void UpdateCameraBuffer(Graphics& gfx) const
 	{
-		std::vector<DirectX::XMMATRIX> matrices(4);
-
-		// Initialize the view matrix, ideally this should be based on user
-		// interactions The lookat and perspective matrices used for rasterization are
-		// defined to transform world-space vertices into a [0,1]x[0,1]x[0,1] camera
-		// space
-		const DirectX::XMVECTOR Eye = DirectX::XMVectorSet(1.5f, 1.5f, 1.5f, 0.0f);
-		const DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-		const DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-		matrices[0] = DirectX::XMMatrixLookAtRH(Eye, At, Up);
-
-		const float fovAngleY = 45.0f * DirectX::XM_PI / 180.0f;
-		matrices[1] =
-			DirectX::XMMatrixPerspectiveFovRH(fovAngleY, 9.0f / 16.0f, 0.1f, 1000.0f);
-
-		// Raytracing has to do the contrary of rasterization: rays are defined in
-		// camera space, and are transformed into world space. To do this, we need to
-		// store the inverse matrices as well.
-		DirectX::XMVECTOR det;
-		matrices[2] = DirectX::XMMatrixInverse(&det, matrices[0]);
-		matrices[3] = DirectX::XMMatrixInverse(&det, matrices[1]);
-
-
 		auto Transforms = std::make_unique<TransformCbuf>(*this);
 		auto MATRICES = Transforms->GetTransformsRT(gfx);
 
