@@ -9,10 +9,10 @@ RaytracingAccelerationStructure SceneBVH : register(t0);
 // MVP transformation matrix
 struct MVP
 {
-    float4x4 View;
-    float4x4 Proj;
-    float4x4 ViewI;
-    float4x4 ProjI;
+    float4x4 view;
+    float4x4 proj;
+    float4x4 viewI;
+    float4x4 projI;
 };
 ConstantBuffer<MVP> mvp : register(b0);
 
@@ -29,10 +29,12 @@ ConstantBuffer<MVP> mvp : register(b0);
   // Define a ray, consisting of origin, direction, and the min-max distance
   // values
     RayDesc ray;
-    ray.Origin = float3(d.x, -d.y, 1);
-    ray.Direction = float3(0, 0, -1);
+    ray.Origin = mul(float4(0, 0, 0, 1), mvp.viewI);
+    float4 target = mul(float4(d.x, -d.y, 1, 1), mvp.projI);
+    ray.Direction = mul(float4(target.xyz, 0), mvp.viewI);
     ray.TMin = 0;
     ray.TMax = 100000;
+    
 
   // Trace the ray
     TraceRay(SceneBVH, RAY_FLAG_NONE, 0xff, 0, 0, 0, ray, payload);

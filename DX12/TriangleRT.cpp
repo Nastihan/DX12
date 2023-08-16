@@ -8,6 +8,8 @@
 
 TriangleRT::TriangleRT(Graphics& gfx)
 {
+	CreateCameraBuffer(gfx);
+
 	const std::vector<Vertex> vertices =
 	{
 		{{0.0f, 1.0f , 0.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}, 
@@ -21,10 +23,29 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	// create RayGen root signature
 	nv_helpers_dx12::RootSignatureGenerator rscG;
 	rscG.AddHeapRangesParameter(
-		{ {0, 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_UAV,0},
-		{0 , 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1} }
-	);
-	rscG.AddRootParameter(D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS, 0, 0, 4);
+		{
+			{
+				0 /*u0*/,
+				1 /*1 descriptor */,
+				0 /*use the implicit register space 0*/,
+				D3D12_DESCRIPTOR_RANGE_TYPE_UAV /* UAV representing the output buffer*/,
+				0 /*heap slot where the UAV is defined*/
+			},
+			{
+				0 /*t0*/,
+				1,
+				0,
+				D3D12_DESCRIPTOR_RANGE_TYPE_SRV /*Top-level acceleration structure*/,
+				1
+			},
+			{
+				0 /*b0*/,
+				1,
+				0,
+				D3D12_DESCRIPTOR_RANGE_TYPE_CBV /*Camera parameters*/,
+				2
+			}
+		});
 	pRayGenSignature = rscG.Generate(gfx.Device().Get(), true);
 	// create RayHit root signature
 	nv_helpers_dx12::RootSignatureGenerator rscH; 
@@ -76,7 +97,7 @@ TriangleRT::TriangleRT(Graphics& gfx)
   // Create a SRV/UAV/CBV descriptor heap. We need 2 entries - 1 UAV for the
   // raytracing output and 1 SRV for the TLAS
 	PSrvUavHeap = nv_helpers_dx12::CreateDescriptorHeap(
-		gfx.Device().Get(), 2, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true);
+		gfx.Device().Get(), 3, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, true);
 
 	// Get a handle to the heap memory on the CPU side, to be able to write the
 	// descriptors directly
@@ -104,6 +125,17 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	// Write the acceleration structure view in the heap
 	gfx.Device()->CreateShaderResourceView(nullptr, &srvDesc, srvHandle);
 
+	// #DXR Extra: Perspective Camera
+	// Add the constant buffer for the camera after the TLAS
+	srvHandle.ptr +=
+		gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	// Describe and create a constant buffer view for the camera
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+	cbvDesc.BufferLocation = m_cameraBuffer->GetGPUVirtualAddress();
+	cbvDesc.SizeInBytes = m_cameraBufferSize;
+	gfx.Device()->CreateConstantBufferView(&cbvDesc, srvHandle);
+
 	// create SBT
 	sbtHelper.Reset();
 
@@ -118,7 +150,7 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	// The ray generation only uses heap data
 	auto transform = std::make_unique<TransformCbuf>(*this);
 	auto mvp = transform->GetTransformsRT(gfx);
-	sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer,&mvp });
+	sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer });
 
 	// The miss and hit shaders do not access any external resources: instead they
 	// communicate their results through the ray payload
@@ -312,4 +344,15 @@ void TriangleRT::CreateAccelerationStructure(Graphics& gfx)
 	gfx.Sync();
 	// Store the AS buffers. The rest of the buffers will be released once we exit the function
 	bottomLevelAS = bottomLevelBuffers.pResult;
+}
+
+void TriangleRT::CreateCameraBuffer(Graphics& gfx)
+{
+	const uint32_t nbMatrix = 4; // view, perspective, viewInv, perspectiveInv
+	m_cameraBufferSize = nbMatrix * sizeof(DirectX::XMMATRIX);
+
+	// Create the constant buffer for all matrices
+	m_cameraBuffer = nv_helpers_dx12::CreateBuffer(
+		gfx.Device().Get(), m_cameraBufferSize, D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, nv_helpers_dx12::kUploadHeapProps);
 }

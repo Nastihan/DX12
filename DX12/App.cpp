@@ -10,6 +10,8 @@ App::App()
 	wnd.Gfx().SetCamera(cam.GetMatrix());
 	wnd.Gfx().SetLight(light);
 
+
+
 }
 
 void App::DoFrame()
@@ -55,7 +57,7 @@ void App::DoFrame()
 
 		triangleRT.Draw(wnd.Gfx());
 
-
+		triangleRT.UpdateCameraBuffer(wnd.Gfx());
 		// execute
 		wnd.Gfx().Execute();
 		wnd.Gfx().Sync();
