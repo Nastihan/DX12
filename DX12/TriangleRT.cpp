@@ -4,6 +4,7 @@
 #include "DXR/BottomLevelASGenerator.h"
 #include "DXR/RaytracingPipelineGenerator.h"
 #include "DXR/RootSignatureGenerator.h"
+#include "BindableInclude.h"
 
 TriangleRT::TriangleRT(Graphics& gfx)
 {
@@ -23,6 +24,7 @@ TriangleRT::TriangleRT(Graphics& gfx)
 		{ {0, 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_UAV,0},
 		{0 , 1, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1} }
 	);
+	rscG.AddRootParameter(D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS, 0, 0, 1);
 	pRayGenSignature = rscG.Generate(gfx.Device().Get(), true);
 	// create RayHit root signature
 	nv_helpers_dx12::RootSignatureGenerator rscH; 
@@ -114,7 +116,9 @@ TriangleRT::TriangleRT(Graphics& gfx)
 	auto heapPointer = reinterpret_cast<UINT64*>(srvUavHeapHandle.ptr);
 
 	// The ray generation only uses heap data
-	sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer });
+	auto transform = std::make_unique<TransformCbuf>(*this);
+	auto mvp = transform->GetTransforms(gfx);
+	sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer,(void*)&mvp });
 
 	// The miss and hit shaders do not access any external resources: instead they
 	// communicate their results through the ray payload
@@ -142,7 +146,7 @@ TriangleRT::TriangleRT(Graphics& gfx)
 
 }
 
-void TriangleRT::Draw(Graphics& gfx)
+void TriangleRT::Draw(Graphics& gfx) const 
 {
 
 	ID3D12DescriptorHeap* heaps[] = { PSrvUavHeap.Get() };
@@ -180,6 +184,39 @@ void TriangleRT::Draw(Graphics& gfx)
 
 	gfx.CommandList()->ResourceBarrier(1, &barrier);
 
+}
+
+DirectX::XMMATRIX TriangleRT::GetTransform() const noexcept
+{
+	auto updateRotationMatrix = []() -> DirectX::XMMATRIX
+		{
+			// Assuming rotationSpeed is the speed at which you want the triangle to rotate (in degrees per second)
+			static float rotationSpeed = 23.0f; // Adjust this value to control rotation speed
+			static float rotationAngle = 0.0f;
+			static std::chrono::steady_clock::time_point prevTime = std::chrono::steady_clock::now();
+
+			// Get the current time
+			auto currentTime = std::chrono::steady_clock::now();
+
+			// Calculate the time elapsed since the last frame
+			float deltaTime = std::chrono::duration<float>(currentTime - prevTime).count();
+			prevTime = currentTime;
+
+			// Update the rotation angle
+			rotationAngle += rotationSpeed * deltaTime;
+
+			// Calculate the new rotation matrix
+			DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(3.0f, 0.0f, 2.0f);
+			DirectX::XMMATRIX rotationMatrix =
+				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationAngle))
+				* DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationAngle))
+				* DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rotationAngle));
+
+			return translation;
+		};
+	const auto model = updateRotationMatrix();
+
+	return model;
 }
 
 // Create a bottom-level acceleration structure based on a list of vertex

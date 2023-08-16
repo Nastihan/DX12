@@ -2,8 +2,10 @@
 #include "Graphics.h"
 #include "DXR/TopLevelASGenerator.h"
 #include <dxcapi.h>
+#include "Drawable.h"
 #include "BindableInclude.h"
 #include <ShaderBindingTableGenerator.h>
+
 
 using Microsoft::WRL::ComPtr;
 
@@ -20,11 +22,12 @@ struct Vertex
 	DirectX::XMFLOAT4 color;
 };
 
-class TriangleRT
+class TriangleRT : public Drawable
 {
 public:
 	TriangleRT(Graphics& gfx);
-	void Draw(Graphics& gfx);
+	void Draw(Graphics& gfx) const override;
+	DirectX::XMMATRIX GetTransform() const noexcept override;
 
 	ComPtr<ID3D12Resource> GetOutputBuffer()
 	{
@@ -35,7 +38,6 @@ public:
 	AccelerationStructureBuffers CreateBottomLevelAS(Graphics& gfx, std::vector<std::pair<ComPtr<ID3D12Resource>, uint32_t>> vVertexBuffers);
 	void CreateTopLevelAS(Graphics& gfx, const std::vector<std::pair<ComPtr<ID3D12Resource>, DirectX::XMMATRIX>>& instances);
 	void CreateAccelerationStructure(Graphics& gfx);
-
 
 private:
 	ComPtr<ID3D12Resource> bottomLevelAS; // storage for the bottom level AS

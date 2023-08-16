@@ -6,6 +6,15 @@ RWTexture2D<float4> gOutput : register(u0);
 // Raytracing acceleration structure, accessed as a SRV
 RaytracingAccelerationStructure SceneBVH : register(t0);
 
+// MVP transformation matrix
+struct MVP
+{
+    float4x4 model;
+    float4x4 modelView;
+    float4x4 modelViewProj;
+};
+ConstantBuffer<MVP> mvp : register(b0);
+
 [shader("raygeneration")] void RayGen() {
   // Initialize the ray payload
   HitInfo payload;
