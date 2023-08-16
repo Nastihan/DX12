@@ -282,6 +282,19 @@ void Graphics::EndFrameRT(Microsoft::WRL::ComPtr <ID3D12Resource> output)
 	ResetCmd();
 
 	// imgui frame end
+	
+	// prepare buffer for presentation by transitioning to present state
+	auto& backBuffer = pBackBuffers[curBackBufferIndex];
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+	pCommandList->ResourceBarrier(1, &barrier);
+
+	pCommandList->CopyResource(backBuffer.Get(), output.Get());
+
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	pCommandList->ResourceBarrier(1, &barrier);
+
 	if (imguiEnabled)
 	{
 		ImGui::Render();
@@ -290,17 +303,9 @@ void Graphics::EndFrameRT(Microsoft::WRL::ComPtr <ID3D12Resource> output)
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), pCommandList.Get());
 	}
 
-	// prepare buffer for presentation by transitioning to present state
-	auto& backBuffer = pBackBuffers[curBackBufferIndex];
-	const auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 	pCommandList->ResourceBarrier(1, &barrier);
-
-	pCommandList->CopyResource(backBuffer.Get(), output.Get());
-
-	const auto barrier2 = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT);
-	pCommandList->ResourceBarrier(1, &barrier2);
 
 	// submit command list
 	Execute();

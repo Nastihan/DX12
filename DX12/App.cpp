@@ -10,8 +10,6 @@ App::App()
 	wnd.Gfx().SetCamera(cam.GetMatrix());
 	wnd.Gfx().SetLight(light);
 
-
-
 }
 
 void App::DoFrame()
