@@ -15,12 +15,16 @@
 #include "Drawable.h"
 #include "BindableInclude.h"
 #include "PointLight.h"
+#include "imgui/imgui.h"
 
 class AssimpTest : public Drawable
 {
 public:
 	AssimpTest(Graphics& gfx)
 	{
+		// mesh cbuf
+		pCBuf = std::make_unique<ConstantBuffer<MeshCBuf>>(gfx, cBufData);
+
 		Assimp::Importer imp;
 		const auto pModel = imp.ReadFile("Models\\suzanne.obj", 
 			aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
@@ -64,11 +68,14 @@ public:
 		}
 
 		// define root signature with a matrix of 16 32-bit floats used by the vertex shader (rotation matrix) 
-		CD3DX12_ROOT_PARAMETER rootParameters[2]{};
+		CD3DX12_ROOT_PARAMETER rootParameters[3]{};
 		rootParameters[0].InitAsConstants(3 * (sizeof(DirectX::XMMATRIX) / 4), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
 		// light desc table
-		const CD3DX12_DESCRIPTOR_RANGE descRange{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,0 };
-		rootParameters[1].InitAsDescriptorTable(1, &descRange, D3D12_SHADER_VISIBILITY_PIXEL);
+		const CD3DX12_DESCRIPTOR_RANGE descRange1{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,0 };
+		rootParameters[1].InitAsDescriptorTable(1, &descRange1, D3D12_SHADER_VISIBILITY_PIXEL);
+		// mesh cbuf table
+		const CD3DX12_DESCRIPTOR_RANGE descRange2{ D3D12_DESCRIPTOR_RANGE_TYPE_CBV,1,1 };
+		rootParameters[2].InitAsDescriptorTable(1, &descRange2, D3D12_SHADER_VISIBILITY_PIXEL);
 
 		// static sampler
 		CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
@@ -110,9 +117,9 @@ public:
 
 		// load the VS & PS
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobVS;
-		D3DReadFileToBlob(L"PhongVS.cso", &BlobVS) >> chk;
+		D3DReadFileToBlob(L"PBRVS.cso", &BlobVS) >> chk;
 		Microsoft::WRL::ComPtr<ID3DBlob> BlobPS;
-		D3DReadFileToBlob(L"PhongPS.cso", &BlobPS) >> chk;
+		D3DReadFileToBlob(L"PBRPS.cso", &BlobPS) >> chk;
 
 		// filling pso structure
 		pipelineStateStream.RootSignature = pRootSignature.Get();
@@ -140,20 +147,22 @@ public:
 		gfx.CommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		gfx.CommandList()->IASetVertexBuffers(0, 1, &pVertexBuffer->vertexBufferView);
 		gfx.CommandList()->IASetIndexBuffer(&pIndexBuffer->indexBufferView);
-		// transforms
-		std::unique_ptr<TransformCbuf> transform = std::make_unique<TransformCbuf>(*this);
+		// trasnform
+		auto transform = std::make_unique<TransformCbuf>(*this);
 		auto mvp = transform->GetTransforms(gfx);
 		gfx.CommandList()->SetGraphicsRoot32BitConstants(0, sizeof(mvp) / 4, &mvp, 0);
-		BindLight(gfx);
+		// set heaps
+		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetHeap().Get() };
+		gfx.CommandList()->SetDescriptorHeaps(std::size(descriptorHeaps), descriptorHeaps);
+		// light cbuffer
+		D3D12_GPU_DESCRIPTOR_HANDLE cbvHandle = gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart();
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(1,cbvHandle);
+		// mesh cbuffer
+		cbvHandle.ptr += 2 * gfx.Device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		gfx.CommandList()->SetGraphicsRootDescriptorTable(2, cbvHandle);
+
 		gfx.ConfigForDraw();
 		gfx.CommandList()->DrawIndexedInstanced(pIndexBuffer->nIndices, 1, 0, 0, 0);
-	}
-
-	void BindLight(Graphics& gfx) const
-	{
-		ID3D12DescriptorHeap* descriptorHeaps[] = { gfx.GetHeap().Get()};
-		gfx.CommandList()->SetDescriptorHeaps(1, descriptorHeaps);
-		gfx.CommandList()->SetGraphicsRootDescriptorTable(1, gfx.GetHeap()->GetGPUDescriptorHandleForHeapStart());
 	}
 
 	DirectX::XMMATRIX GetTransform() const noexcept override
@@ -188,14 +197,44 @@ public:
 
 		return model;
 	}
+
+	void Update(Graphics& gfx)
+	{
+		pCBuf->Update(gfx, cBufData);
+	}
+
+	void SpawnControlWindow()
+	{
+		if (ImGui::Begin("Suzanne"))
+		{
+			ImGui::SliderFloat("Albedo R", &cBufData.albedo.x, 0.0f, 1.0f);
+			ImGui::SliderFloat("Albedo G", &cBufData.albedo.y, 0.0f, 1.0f);
+			ImGui::SliderFloat("Albedo B", &cBufData.albedo.z, 0.0f, 1.0f);
+			ImGui::SliderFloat3("Emissivity", reinterpret_cast<float*>(&cBufData.emissivity), 0.0f, 1.0f);
+			ImGui::SliderFloat3("Base reflectance", reinterpret_cast<float*>(&cBufData.baseReflectance), 0.0f, 1.0f);
+			ImGui::SliderFloat("Roughness", &cBufData.roughness, 0.010f, 1.0f);
+
+		}
+		ImGui::End();
+	}
+	
+private:
+	struct alignas(256) MeshCBuf
+	{
+		alignas(16) DirectX::XMFLOAT3 albedo{ 1.0f, 0.0f, 0.0f };
+		alignas(16) DirectX::XMFLOAT3 emissivity{ 0.0f, 0.0f, 0.0f };
+		alignas(16) DirectX::XMFLOAT3 baseReflectance = { 0.4f, 0.4f, 0.4f };
+		float roughness = 0.3f;
+	};
 private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> pRootSignature;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pPipelineState;
-
 	// vertex buffer 
 	std::unique_ptr<VertexBuffer> pVertexBuffer;
 	// index buffer 
 	std::unique_ptr<IndexBuffer> pIndexBuffer;
-
+	// mesh constant buffer
+	std::unique_ptr<ConstantBuffer<MeshCBuf>> pCBuf;
+	MeshCBuf cBufData;
 
 };

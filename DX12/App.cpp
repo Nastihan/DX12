@@ -22,6 +22,7 @@ void App::DoFrame()
 		// update buffers
 		light.Update(wnd.Gfx(), cam.GetMatrix());
 		spherePBR.Update(wnd.Gfx());
+		test.Update(wnd.Gfx());
 
 		// render loop body begin
 		// reset command list
@@ -30,7 +31,7 @@ void App::DoFrame()
 		// Draw Calls
 		light.Draw(wnd.Gfx());
 		//cube.Draw(wnd.Gfx());
-		//test.Draw(wnd.Gfx());
+		test.Draw(wnd.Gfx());
 		spherePBR.Draw(wnd.Gfx());
 
 		// execute
@@ -41,6 +42,7 @@ void App::DoFrame()
 		light.SpawnControlWindow();
 		cam.SpawnControlWindow();
 		spherePBR.SpawnControlWindow();
+		test.SpawnControlWindow();
 		ShowFPSWindow();
 
 		wnd.Gfx().EndFrame();
