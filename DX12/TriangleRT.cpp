@@ -149,7 +149,7 @@ TriangleRT::TriangleRT(Graphics& gfx)
 
 	// The ray generation only uses heap data
 	auto transform = std::make_unique<TransformCbuf>(*this);
-	auto mvp = transform->GetTransformsRT(gfx);
+	auto transforms = transform->GetTransformsRT(gfx);
 	sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer });
 
 	// The miss and hit shaders do not access any external resources: instead they

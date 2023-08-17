@@ -7,14 +7,14 @@ RWTexture2D<float4> gOutput : register(u0);
 RaytracingAccelerationStructure SceneBVH : register(t0);
 
 // MVP transformation matrix
-struct MVP
+struct Transforms
 {
     float4x4 view;
     float4x4 proj;
     float4x4 viewI;
     float4x4 projI;
 };
-ConstantBuffer<MVP> mvp : register(b0);
+ConstantBuffer<Transforms> transforms : register(b0);
 
 [shader("raygeneration")] void RayGen() {
   // Initialize the ray payload
@@ -29,9 +29,9 @@ ConstantBuffer<MVP> mvp : register(b0);
   // Define a ray, consisting of origin, direction, and the min-max distance
   // values
     RayDesc ray;
-    ray.Origin = mul(float4(0, 0, 0, 1), mvp.viewI);
+    ray.Origin = mul(float4(0, 0, 0, 1), transforms.viewI);
     float4 target = float4(d.x, -d.y, 1, 1);
-    float4 targetView = mul(target, mvp.projI);
+    float4 targetView = mul(target, transforms.projI);
     ray.Direction = normalize(targetView.xyz / targetView.w - ray.Origin.xyz);
     ray.TMin = 0;
     ray.TMax = 100000;
